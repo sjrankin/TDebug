@@ -9,11 +9,12 @@
 import Foundation
 import UIKit
 
-class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource
+class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource, CommDelegate
 {
     let IDTableTag = 100
     let StatusTableTag = 200
     let LogTableTag = 300
+    var TComm: Comm!
     
     override func viewDidLoad()
     {
@@ -50,6 +51,33 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         EnableIdiotLight("C", 1, false)
         EnableIdiotLight("C", 2, false)
         EnableIdiotLight("C", 3, false)
+        
+        TComm = Comm()
+        TComm.CallerDelegate = self
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(EnteredBackground),
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(EnteredForeground),
+                                               name: UIApplication.willEnterForegroundNotification,
+                                               object: nil)
+    }
+    
+    func RawDataReceived(_ RawData: String, _ BytesRead: Int)
+    {
+        print("Received raw data from remote system.")
+    }
+    
+    @objc func EnteredBackground(_ notification: Notification)
+    {
+        TComm.HandleEnteredBackground()
+    }
+    
+    @objc func EnteredForeground(_ notification: Notification)
+    {
+        TComm.HandleEnteredForeground()
     }
     
     func InitializeUI()
