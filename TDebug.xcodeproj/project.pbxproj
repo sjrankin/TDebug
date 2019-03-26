@@ -17,6 +17,8 @@
 		1734ABFC22488CD9007059F3 /* StatusTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABFB22488CD9007059F3 /* StatusTableCell.swift */; };
 		1734ABFE22488DCB007059F3 /* LogTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABFD22488DCB007059F3 /* LogTableCell.swift */; };
 		1734AC022248CDB6007059F3 /* SendToRemote.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1734AC012248CDB6007059F3 /* SendToRemote.storyboard */; };
+		177FAB24224A222400379A4C /* Comm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB23224A222400379A4C /* Comm.swift */; };
+		177FAB26224A250C00379A4C /* CommDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB25224A250C00379A4C /* CommDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		1734ABFB22488CD9007059F3 /* StatusTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusTableCell.swift; sourceTree = "<group>"; };
 		1734ABFD22488DCB007059F3 /* LogTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTableCell.swift; sourceTree = "<group>"; };
 		1734AC012248CDB6007059F3 /* SendToRemote.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = SendToRemote.storyboard; sourceTree = "<group>"; };
+		177FAB23224A222400379A4C /* Comm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comm.swift; sourceTree = "<group>"; };
+		177FAB25224A250C00379A4C /* CommDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +79,8 @@
 				1734ABFB22488CD9007059F3 /* StatusTableCell.swift */,
 				1734ABFD22488DCB007059F3 /* LogTableCell.swift */,
 				1734ABEC22487F81007059F3 /* LaunchScreen.storyboard */,
+				177FAB23224A222400379A4C /* Comm.swift */,
+				177FAB25224A250C00379A4C /* CommDelegate.swift */,
 			);
 			path = TDebug;
 			sourceTree = "<group>";
@@ -155,7 +161,9 @@
 				1734ABF6224883D3007059F3 /* MainController.swift in Sources */,
 				1734ABFC22488CD9007059F3 /* StatusTableCell.swift in Sources */,
 				1734ABE422487F80007059F3 /* AppDelegate.swift in Sources */,
+				177FAB26224A250C00379A4C /* CommDelegate.swift in Sources */,
 				1734ABFA2248889C007059F3 /* IDTableCell.swift in Sources */,
+				177FAB24224A222400379A4C /* Comm.swift in Sources */,
 				1734ABFE22488DCB007059F3 /* LogTableCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
