@@ -19,6 +19,23 @@
 		1734AC022248CDB6007059F3 /* SendToRemote.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1734AC012248CDB6007059F3 /* SendToRemote.storyboard */; };
 		177FAB24224A222400379A4C /* Comm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB23224A222400379A4C /* Comm.swift */; };
 		177FAB26224A250C00379A4C /* CommDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB25224A250C00379A4C /* CommDelegate.swift */; };
+		177FAB28224A468A00379A4C /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB27224A468A00379A4C /* CommandParser.swift */; };
+		177FAB2B224A46CB00379A4C /* CommandObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB2A224A46CB00379A4C /* CommandObject.swift */; };
+		177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB2C224A46EA00379A4C /* CommandProtocol.swift */; };
+		177FAB2F224A47E000379A4C /* Command.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB2E224A47E000379A4C /* Command.swift */; };
+		177FAB32224A4A9A00379A4C /* Command_NOP.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB31224A4A9A00379A4C /* Command_NOP.swift */; };
+		177FAB34224A4B2700379A4C /* CommandObjectProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB33224A4B2700379A4C /* CommandObjectProtocol.swift */; };
+		177FAB36224A58A400379A4C /* Command_AddToID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB35224A58A400379A4C /* Command_AddToID.swift */; };
+		177FAB38224A592100379A4C /* Command_DisableIdiotLight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB37224A592100379A4C /* Command_DisableIdiotLight.swift */; };
+		177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */; };
+		17EF4151224B2D890008EB83 /* ManualConnect.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17EF4150224B2D890008EB83 /* ManualConnect.storyboard */; };
+		17EF4153224B2E490008EB83 /* ManualConnectCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF4152224B2E490008EB83 /* ManualConnectCode.swift */; };
+		17EF4155224B2FF10008EB83 /* ManualConnectProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF4154224B2FF10008EB83 /* ManualConnectProtocol.swift */; };
+		17EF4158224B71F50008EB83 /* LogItemViewer.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17EF4157224B71F50008EB83 /* LogItemViewer.storyboard */; };
+		17EF415A224B8BFC0008EB83 /* LogItemViewerCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF4159224B8BFC0008EB83 /* LogItemViewerCode.swift */; };
+		17EF415C224B8D380008EB83 /* LogItemProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF415B224B8D370008EB83 /* LogItemProtocol.swift */; };
+		17EF415F224B97AD0008EB83 /* CommStatic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF415E224B97AD0008EB83 /* CommStatic.swift */; };
+		17EF4161224BAE440008EB83 /* Versioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF4160224BAE440008EB83 /* Versioning.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +53,23 @@
 		1734AC012248CDB6007059F3 /* SendToRemote.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = SendToRemote.storyboard; sourceTree = "<group>"; };
 		177FAB23224A222400379A4C /* Comm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Comm.swift; sourceTree = "<group>"; };
 		177FAB25224A250C00379A4C /* CommDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommDelegate.swift; sourceTree = "<group>"; };
+		177FAB27224A468A00379A4C /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
+		177FAB2A224A46CB00379A4C /* CommandObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandObject.swift; sourceTree = "<group>"; };
+		177FAB2C224A46EA00379A4C /* CommandProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandProtocol.swift; sourceTree = "<group>"; };
+		177FAB2E224A47E000379A4C /* Command.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command.swift; sourceTree = "<group>"; };
+		177FAB31224A4A9A00379A4C /* Command_NOP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_NOP.swift; sourceTree = "<group>"; };
+		177FAB33224A4B2700379A4C /* CommandObjectProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandObjectProtocol.swift; sourceTree = "<group>"; };
+		177FAB35224A58A400379A4C /* Command_AddToID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_AddToID.swift; sourceTree = "<group>"; };
+		177FAB37224A592100379A4C /* Command_DisableIdiotLight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_DisableIdiotLight.swift; sourceTree = "<group>"; };
+		177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_SetIdiotLight.swift; sourceTree = "<group>"; };
+		17EF4150224B2D890008EB83 /* ManualConnect.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ManualConnect.storyboard; sourceTree = "<group>"; };
+		17EF4152224B2E490008EB83 /* ManualConnectCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualConnectCode.swift; sourceTree = "<group>"; };
+		17EF4154224B2FF10008EB83 /* ManualConnectProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualConnectProtocol.swift; sourceTree = "<group>"; };
+		17EF4157224B71F50008EB83 /* LogItemViewer.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LogItemViewer.storyboard; sourceTree = "<group>"; };
+		17EF4159224B8BFC0008EB83 /* LogItemViewerCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogItemViewerCode.swift; sourceTree = "<group>"; };
+		17EF415B224B8D370008EB83 /* LogItemProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogItemProtocol.swift; sourceTree = "<group>"; };
+		17EF415E224B97AD0008EB83 /* CommStatic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommStatic.swift; sourceTree = "<group>"; };
+		17EF4160224BAE440008EB83 /* Versioning.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Versioning.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,17 +106,66 @@
 				1734ABEF22487F81007059F3 /* Info.plist */,
 				1734ABE322487F80007059F3 /* AppDelegate.swift */,
 				1734ABE722487F80007059F3 /* Main.storyboard */,
-				1734AC012248CDB6007059F3 /* SendToRemote.storyboard */,
 				1734ABF5224883D3007059F3 /* MainController.swift */,
-				1734ABF72248862A007059F3 /* LogItem.swift */,
+				17EF4150224B2D890008EB83 /* ManualConnect.storyboard */,
+				17EF4154224B2FF10008EB83 /* ManualConnectProtocol.swift */,
+				17EF4152224B2E490008EB83 /* ManualConnectCode.swift */,
+				1734AC012248CDB6007059F3 /* SendToRemote.storyboard */,
 				1734ABF92248889C007059F3 /* IDTableCell.swift */,
 				1734ABFB22488CD9007059F3 /* StatusTableCell.swift */,
-				1734ABFD22488DCB007059F3 /* LogTableCell.swift */,
 				1734ABEC22487F81007059F3 /* LaunchScreen.storyboard */,
-				177FAB23224A222400379A4C /* Comm.swift */,
-				177FAB25224A250C00379A4C /* CommDelegate.swift */,
+				17EF4160224BAE440008EB83 /* Versioning.swift */,
+				17EF415D224B8FC20008EB83 /* LogDisplay */,
+				17EF4156224B64860008EB83 /* Communications */,
+				177FAB29224A46B500379A4C /* Commands */,
 			);
 			path = TDebug;
+			sourceTree = "<group>";
+		};
+		177FAB29224A46B500379A4C /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				177FAB30224A4A8600379A4C /* Commands */,
+				177FAB27224A468A00379A4C /* CommandParser.swift */,
+				177FAB2A224A46CB00379A4C /* CommandObject.swift */,
+				177FAB2C224A46EA00379A4C /* CommandProtocol.swift */,
+				177FAB2E224A47E000379A4C /* Command.swift */,
+				177FAB33224A4B2700379A4C /* CommandObjectProtocol.swift */,
+			);
+			path = Commands;
+			sourceTree = "<group>";
+		};
+		177FAB30224A4A8600379A4C /* Commands */ = {
+			isa = PBXGroup;
+			children = (
+				177FAB31224A4A9A00379A4C /* Command_NOP.swift */,
+				177FAB35224A58A400379A4C /* Command_AddToID.swift */,
+				177FAB37224A592100379A4C /* Command_DisableIdiotLight.swift */,
+				177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */,
+			);
+			path = Commands;
+			sourceTree = "<group>";
+		};
+		17EF4156224B64860008EB83 /* Communications */ = {
+			isa = PBXGroup;
+			children = (
+				177FAB25224A250C00379A4C /* CommDelegate.swift */,
+				177FAB23224A222400379A4C /* Comm.swift */,
+				17EF415E224B97AD0008EB83 /* CommStatic.swift */,
+			);
+			path = Communications;
+			sourceTree = "<group>";
+		};
+		17EF415D224B8FC20008EB83 /* LogDisplay */ = {
+			isa = PBXGroup;
+			children = (
+				1734ABF72248862A007059F3 /* LogItem.swift */,
+				1734ABFD22488DCB007059F3 /* LogTableCell.swift */,
+				17EF4159224B8BFC0008EB83 /* LogItemViewerCode.swift */,
+				17EF415B224B8D370008EB83 /* LogItemProtocol.swift */,
+				17EF4157224B71F50008EB83 /* LogItemViewer.storyboard */,
+			);
+			path = LogDisplay;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -95,6 +178,7 @@
 				1734ABDC22487F80007059F3 /* Sources */,
 				1734ABDD22487F80007059F3 /* Frameworks */,
 				1734ABDE22487F80007059F3 /* Resources */,
+				17EF4162224BAFD90008EB83 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -145,26 +229,63 @@
 			files = (
 				1734ABEE22487F81007059F3 /* LaunchScreen.storyboard in Resources */,
 				1734ABEB22487F81007059F3 /* Assets.xcassets in Resources */,
+				17EF4158224B71F50008EB83 /* LogItemViewer.storyboard in Resources */,
 				1734ABE922487F80007059F3 /* Main.storyboard in Resources */,
+				17EF4151224B2D890008EB83 /* ManualConnect.storyboard in Resources */,
 				1734AC022248CDB6007059F3 /* SendToRemote.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		17EF4162224BAFD90008EB83 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/Users/Stuart/Documents/GitHub/TDebug/TDebug/VersionUpdater/VersionUpdater /Users/Stuart/Documents/GitHub/TDebug/TDebug/Versioning.swift\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1734ABDC22487F80007059F3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				177FAB2B224A46CB00379A4C /* CommandObject.swift in Sources */,
 				1734ABF82248862A007059F3 /* LogItem.swift in Sources */,
+				17EF4155224B2FF10008EB83 /* ManualConnectProtocol.swift in Sources */,
+				177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */,
+				177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */,
 				1734ABF6224883D3007059F3 /* MainController.swift in Sources */,
+				177FAB34224A4B2700379A4C /* CommandObjectProtocol.swift in Sources */,
 				1734ABFC22488CD9007059F3 /* StatusTableCell.swift in Sources */,
+				17EF4153224B2E490008EB83 /* ManualConnectCode.swift in Sources */,
 				1734ABE422487F80007059F3 /* AppDelegate.swift in Sources */,
+				177FAB28224A468A00379A4C /* CommandParser.swift in Sources */,
 				177FAB26224A250C00379A4C /* CommDelegate.swift in Sources */,
+				17EF415A224B8BFC0008EB83 /* LogItemViewerCode.swift in Sources */,
+				17EF415C224B8D380008EB83 /* LogItemProtocol.swift in Sources */,
 				1734ABFA2248889C007059F3 /* IDTableCell.swift in Sources */,
 				177FAB24224A222400379A4C /* Comm.swift in Sources */,
+				177FAB32224A4A9A00379A4C /* Command_NOP.swift in Sources */,
+				17EF415F224B97AD0008EB83 /* CommStatic.swift in Sources */,
+				177FAB36224A58A400379A4C /* Command_AddToID.swift in Sources */,
+				177FAB38224A592100379A4C /* Command_DisableIdiotLight.swift in Sources */,
 				1734ABFE22488DCB007059F3 /* LogTableCell.swift in Sources */,
+				177FAB2F224A47E000379A4C /* Command.swift in Sources */,
+				17EF4161224BAE440008EB83 /* Versioning.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
