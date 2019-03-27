@@ -9,8 +9,10 @@
 import Foundation
 import UIKit
 
-class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource, CommDelegate
+class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource, CommDelegate, ManualConnectProtocol
 {
+    var HostNames: [String]? = nil
+    
     let IDTableTag = 100
     let StatusTableTag = 200
     let LogTableTag = 300
@@ -38,10 +40,25 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         IdiotLightContainer.layer.borderColor = UIColor.darkGray.cgColor
         LoadIdiotLights()
         
-        AddIDData("Program", "TDebug")
-        AddIDData("Version", "1.0")
+        AddIDData("Program", Versioning.ApplicationName)
+        AddIDData("Version", Versioning.MakeVersionString(IncludeVersionSuffix: true, IncludeVersionPrefix: false))
+        AddIDData("Build", "\(Versioning.Build)")
+        AddIDData("This Host", GetDeviceName())
+        let SomeItem = LogItem(ItemID: UUID(),
+                               TimeStamp: Comm.MakeTimeStamp(FromDate: Date()),
+                               Text: Versioning.MakeVersionBlock() + "\n" + "Running on \(GetDeviceName())")
+        SomeItem.BGColor = UIColor(named: "Lavender")
+        LogList.append(SomeItem)
         
+        let AppDel = UIApplication.shared.delegate as! AppDelegate
+        TComm = AppDel.TComm
+        TComm.CallerDelegate = self
+        TComm.Start()
+        
+        //Show inital values in the UI.
         AddStatusData("Status", "Waiting for connection")
+        AddStatusData("Type", Comm.kTDebugBonjourType)
+        AddStatusData("Port", "\(TComm.Port)")
         SetIdiotLight("A", 1, "Not Connected", UIColor.white, UIColor(red: 0.5, green: 0.0, blue: 0.0, alpha: 1.0))
         EnableIdiotLight("A", 2, false)
         EnableIdiotLight("A", 3, false)
@@ -51,9 +68,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         EnableIdiotLight("C", 1, false)
         EnableIdiotLight("C", 2, false)
         EnableIdiotLight("C", 3, false)
-        
-        TComm = Comm()
-        TComm.CallerDelegate = self
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(EnteredBackground),
@@ -65,9 +79,46 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
                                                object: nil)
     }
     
+    /// Returns the name of the device. In this case, "name" means the name the user gave the device.
+    ///
+    /// - Returns: Name of the device.
+    func GetDeviceName() -> String
+    {
+        var SysInfo = utsname()
+        uname(&SysInfo)
+        let Name = withUnsafePointer(to: &SysInfo.nodename.0)
+        {
+            ptr in
+            return String(cString: ptr)
+        }
+        let Parts = Name.split(separator: ".")
+        return String(Parts[0])
+    }
+    
+    func SetSelectedHost(HostName: String)
+    {
+        if HostName.isEmpty
+        {
+            return
+        }
+        print("User selected host: \(HostName)")
+    }
+    
     func RawDataReceived(_ RawData: String, _ BytesRead: Int)
     {
         print("Received raw data from remote system.")
+    }
+    
+    func RemoteServerList(_ List: [String])
+    {
+        //Got remote server list.
+        for Name in List
+        {
+            let SomeItem = LogItem(ItemID: UUID(), TimeStamp: Comm.MakeTimeStamp(FromDate: Date()), Text: "Remote server: " + Name)
+            SomeItem.BGColor = UIColor(named: "Lavender")
+            LogList.append(SomeItem)
+        }
+        LogTable.reloadData()
     }
     
     @objc func EnteredBackground(_ notification: Notification)
@@ -232,6 +283,17 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+    var TappedLogItemID: UUID!
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
+    {
+        if tableView.tag == LogTableTag
+        {
+            TappedLogItemID = LogList[indexPath.row].ID!
+            performSegue(withIdentifier: "ToLogItemViewer", sender: self)
+        }
+    }
+    
     func MakeIDCell(_ Row: Int) -> UITableViewCell
     {
         let IDCell = IDTableCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "IDTableCell")
@@ -249,7 +311,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func MakeLogCell(_ Row: Int) -> UITableViewCell
     {
         let LogCell = LogTableCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "LogTableCell")
-        LogCell.SetData(Name: LogList[Row].Title, Value: LogList[Row].Message)
+        LogCell.SetData(Item: LogList[Row])
         return LogCell
     }
     
@@ -311,16 +373,63 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
     }
     
-    @IBAction func HandleConnectButton(_ sender: Any)
-    {
-    }
-    
     @IBAction func HandleSendButton(_ sender: Any)
     {
     }
     
     @IBAction func HandleActionButton(_ sender: Any)
     {
+    }
+    
+    @IBAction func HandleConnectButton(_ sender: Any)
+    {
+        performSegue(withIdentifier: "ToConnector", sender: self)
+    }
+    
+    func GetLogItem(_ FromID: UUID) -> LogItem
+    {
+        for Item in LogList
+        {
+            if Item.ID! == FromID
+            {
+                return Item
+            }
+        }
+        fatalError("Could not find log item even though it should be present.")
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?)
+    {
+        switch segue.identifier
+        {
+        case "ToConnector":
+            if let Dest = segue.destination as? ManualConnectCode
+            {
+                Dest.ParentDelegate = self
+                Dest.HostNames = [String]()
+            }
+            else
+            {
+                print("Error running connector view.")
+                return
+            }
+            
+        case "ToLogItemViewer":
+            if let Dest = segue.destination as? LogItemViewerCode
+            {
+                Dest.DisplayItem = GetLogItem(TappedLogItemID)
+            }
+            
+        default:
+            break
+        }
+        
+        super.prepare(for: segue, sender: self)
+    }
+    
+    func RefreshList() -> [String]
+    {
+        return [String]()
     }
     
     var IDList = [(String, String)]()
