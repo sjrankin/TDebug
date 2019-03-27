@@ -13,11 +13,15 @@ import UIKit
 @UIApplicationMain class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
+    var TComm: Comm!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
         // Override point for customization after application launch.
         
+        //Initialize the communications class. It has to reside here to keep it constantly in scope.
+        TComm = Comm()
+        UIApplication.shared.isIdleTimerDisabled = true
         return true
     }
     
