@@ -20,9 +20,23 @@ import UIKit
         // Override point for customization after application launch.
         
         //Initialize the communications class. It has to reside here to keep it constantly in scope.
-        TComm = Comm()
+        
+        TComm = Comm(Name: GetDeviceName())
         UIApplication.shared.isIdleTimerDisabled = true
         return true
+    }
+    
+    func GetDeviceName() -> String
+    {
+        var SysInfo = utsname()
+        uname(&SysInfo)
+        let Name = withUnsafePointer(to: &SysInfo.nodename.0)
+        {
+            ptr in
+            return String(cString: ptr)
+        }
+        let Parts = Name.split(separator: ".")
+        return String(Parts[0])
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
