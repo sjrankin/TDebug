@@ -9,7 +9,8 @@
 import Foundation
 import UIKit
 
-class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource, CommDelegate, ManualConnectProtocol
+class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource,
+    CommDelegate, ManualConnectProtocol
 {
     var HostNames: [String]? = nil
     
@@ -406,7 +407,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
             if let Dest = segue.destination as? ManualConnectCode
             {
                 Dest.ParentDelegate = self
-                Dest.HostNames = [String]()
             }
             else
             {
@@ -425,11 +425,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
         super.prepare(for: segue, sender: self)
-    }
-    
-    func RefreshList() -> [String]
-    {
-        return [String]()
     }
     
     var IDList = [(String, String)]()
