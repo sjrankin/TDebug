@@ -55,6 +55,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         TComm = AppDel.TComm
         TComm.CallerDelegate = self
         TComm.Start()
+        TComm.SearchForServices()
         
         //Show inital values in the UI.
         AddStatusData("Status", "Waiting for connection")
@@ -96,26 +97,46 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return String(Parts[0])
     }
     
-    func SetSelectedHost(HostName: String)
+    func SetSelectedHost(HostName: String, Server: NetService?)
     {
         if HostName.isEmpty
         {
             return
         }
         print("User selected host: \(HostName)")
+        CurrentHost = HostName
+        CurrentServer = Server
     }
+    
+    var CurrentHost: String = ""
+    var CurrentServer: NetService? = nil
     
     func RawDataReceived(_ RawData: String, _ BytesRead: Int)
     {
+        if RawData.isEmpty
+        {
+            print("Received empty message.")
+            return
+        }
         print("Received raw data from remote system.")
+        let (Source, TS, Message) = TComm.SplitMessage(RawData)
+        let ItemText = "From \(Source): \(Message)"
+        let Item = LogItem(TimeStamp: TS, Text: ItemText)
+        Item.BGColor = UIColor(named: "Tomato")
+        Item.BGAnimateTargetColor = UIColor.white
+        Item.BGAnimateColorDuration = 2.0
+        Item.DoAnimateBGColor = true
+        LogList.append(Item)
+        LogTable.reloadData()
+        LogTable.scrollToRow(at: IndexPath(row: LogList.count - 1, section: 0), at: UITableView.ScrollPosition.bottom, animated: true)
     }
     
-    func RemoteServerList(_ List: [String])
+    func RemoteServerList(_ List: [(String, NetService)])
     {
         //Got remote server list.
-        for Name in List
+        for SomeServer in List
         {
-            let SomeItem = LogItem(ItemID: UUID(), TimeStamp: Comm.MakeTimeStamp(FromDate: Date()), Text: "Remote server: " + Name)
+            let SomeItem = LogItem(ItemID: UUID(), TimeStamp: Comm.MakeTimeStamp(FromDate: Date()), Text: "Remote server: " + SomeServer.0)
             SomeItem.BGColor = UIColor(named: "Lavender")
             LogList.append(SomeItem)
         }
@@ -425,6 +446,32 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
         super.prepare(for: segue, sender: self)
+    }
+    
+    @IBAction func HandleTestButton(_ sender: Any)
+    {
+        if CurrentHost.isEmpty
+        {
+            MustSelectHostFirst()
+            return
+        }
+        TComm.ConnectToRemote(CurrentServer!)
+        TComm.Send(Message: "Test \(TestCount)")
+        TestCount = TestCount + 1
+    }
+    
+    var TestCount: Int = 1
+    
+    func MustSelectHostFirst()
+    {
+        let Alert = UIAlertController(title: "No Host", message: "You must select a host first.", preferredStyle: UIAlertController.Style.alert)
+        Alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
+        present(Alert, animated: true)
+    }
+    
+    @IBAction func HandleRefreshButton(_ sender: Any)
+    {
+        TComm.SearchForServices()
     }
     
     var IDList = [(String, String)]()
