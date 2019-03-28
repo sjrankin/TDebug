@@ -10,5 +10,5 @@ import Foundation
 
 protocol ManualConnectProtocol: class
 {
-    func SetSelectedHost(HostName: String)
+    func SetSelectedHost(HostName: String, Server: NetService?)
 }

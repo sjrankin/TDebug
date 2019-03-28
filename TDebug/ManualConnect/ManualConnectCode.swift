@@ -40,8 +40,8 @@ class ManualConnectCode: UIViewController, ManualConnectProtocol, CommDelegate,
         //self.tableView.tableFooterView = UIView()
     }
     
-    private var _HostNames: [String]? = nil
-    public var HostNames: [String]?
+    private var _HostNames: [(String, NetService)]? = nil
+    public var HostNames: [(String, NetService)]?
     {
         get
         {
@@ -53,7 +53,7 @@ class ManualConnectCode: UIViewController, ManualConnectProtocol, CommDelegate,
         }
     }
     
-    func SetSelectedHost(HostName: String)
+    func SetSelectedHost(HostName: String, Server: NetService?)
     {
         //Not used in this class.
     }
@@ -74,7 +74,7 @@ class ManualConnectCode: UIViewController, ManualConnectProtocol, CommDelegate,
             return UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "RemoteHostCell")
         }
         let Cell = UITableViewCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "RemoteHostCell")
-        Cell.textLabel!.text = HostNames![indexPath.row]
+        Cell.textLabel!.text = HostNames![indexPath.row].0
         return Cell
     }
     
@@ -82,11 +82,11 @@ class ManualConnectCode: UIViewController, ManualConnectProtocol, CommDelegate,
     {
         if let Names = HostNames
         {
-            ParentDelegate?.SetSelectedHost(HostName: Names[indexPath.row])
+            ParentDelegate?.SetSelectedHost(HostName: Names[indexPath.row].0, Server: Names[indexPath.row].1)
         }
         else
         {
-            ParentDelegate?.SetSelectedHost(HostName: "")
+            ParentDelegate?.SetSelectedHost(HostName: "", Server: nil)
         }
         dismiss(animated: true, completion: nil)
     }
@@ -108,7 +108,7 @@ class ManualConnectCode: UIViewController, ManualConnectProtocol, CommDelegate,
         //Not used in this class.
     }
     
-    func RemoteServerList(_ List: [String])
+    func RemoteServerList(_ List: [(String, NetService)])
     {
         HostNames = List
         WaitingIndicator.isHidden = true
@@ -117,7 +117,7 @@ class ManualConnectCode: UIViewController, ManualConnectProtocol, CommDelegate,
     
     @IBAction func HandleBackButton(_ sender: Any)
     {
-        ParentDelegate?.SetSelectedHost(HostName: "")
+        ParentDelegate?.SetSelectedHost(HostName: "", Server: nil)
         dismiss(animated: true, completion: nil)
     }
     
