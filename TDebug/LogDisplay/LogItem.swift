@@ -12,6 +12,16 @@ import UIKit
 /// Contains one log item.
 class LogItem
 {
+    /// Initializer. The ID and timestamp are generated automatically.
+    ///
+    /// - Parameter Text: The text of the item.
+    init(Text: String)
+    {
+        _ID = UUID()
+        Title = Comm.MakeTimeStamp(FromDate: Date())
+        Message = Text
+    }
+    
     /// Initializer.
     ///
     /// - Parameters:
@@ -104,6 +114,58 @@ class LogItem
         set
         {
             _BGColor = newValue
+        }
+    }
+    
+    private var _DoAnimateBGColor: Bool = false
+    public var DoAnimateBGColor: Bool
+    {
+        get
+        {
+            return _DoAnimateBGColor
+        }
+        set
+        {
+            _DoAnimateBGColor = newValue
+        }
+    }
+    
+    private var _BGAnimateColorDuration: Double = 2.0
+    public var BGAnimateColorDuration: Double
+    {
+        get
+        {
+            return _BGAnimateColorDuration
+        }
+        set
+        {
+            _BGAnimateColorDuration = newValue
+        }
+    }
+    
+    private var _BGAnimateTargetColor: UIColor = UIColor.white
+    public var BGAnimateTargetColor: UIColor
+    {
+        get
+        {
+            return _BGAnimateTargetColor
+        }
+        set
+        {
+            _BGAnimateTargetColor = newValue
+        }
+    }
+    
+    private var _HasAnimated: Bool = false
+    public var HasAnimated: Bool
+    {
+        get
+        {
+            return _HasAnimated
+        }
+        set
+        {
+            _HasAnimated = newValue
         }
     }
 }
