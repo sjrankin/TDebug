@@ -107,14 +107,12 @@
 				1734ABE322487F80007059F3 /* AppDelegate.swift */,
 				1734ABE722487F80007059F3 /* Main.storyboard */,
 				1734ABF5224883D3007059F3 /* MainController.swift */,
-				17EF4150224B2D890008EB83 /* ManualConnect.storyboard */,
-				17EF4154224B2FF10008EB83 /* ManualConnectProtocol.swift */,
-				17EF4152224B2E490008EB83 /* ManualConnectCode.swift */,
 				1734AC012248CDB6007059F3 /* SendToRemote.storyboard */,
 				1734ABF92248889C007059F3 /* IDTableCell.swift */,
 				1734ABFB22488CD9007059F3 /* StatusTableCell.swift */,
 				1734ABEC22487F81007059F3 /* LaunchScreen.storyboard */,
 				17EF4160224BAE440008EB83 /* Versioning.swift */,
+				178348F0224C8B250074D7BA /* ManualConnect */,
 				17EF415D224B8FC20008EB83 /* LogDisplay */,
 				17EF4156224B64860008EB83 /* Communications */,
 				177FAB29224A46B500379A4C /* Commands */,
@@ -144,6 +142,16 @@
 				177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */,
 			);
 			path = Commands;
+			sourceTree = "<group>";
+		};
+		178348F0224C8B250074D7BA /* ManualConnect */ = {
+			isa = PBXGroup;
+			children = (
+				17EF4154224B2FF10008EB83 /* ManualConnectProtocol.swift */,
+				17EF4150224B2D890008EB83 /* ManualConnect.storyboard */,
+				17EF4152224B2E490008EB83 /* ManualConnectCode.swift */,
+			);
+			path = ManualConnect;
 			sourceTree = "<group>";
 		};
 		17EF4156224B64860008EB83 /* Communications */ = {
