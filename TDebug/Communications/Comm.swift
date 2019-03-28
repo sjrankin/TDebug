@@ -29,52 +29,87 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
     var NetBrowser: NetServiceBrowser!
     weak var CallerDelegate: CommDelegate? = nil
     weak var AuxDelegate: CommDelegate? = nil
-    var RemoteServers = [String]()
+    var RemoteServers = [(String, NetService)]()
+    var DeviceName: String = "{unknown}"
     
-    override init()
+    /// Initializer.
+    init(Name: String)
     {
         super.init()
+        DeviceName = Name
+        Reset(From: "init")
     }
     
+    /// Reset the class to its initial state.
+    func Reset(From: String)
+    {
+        print("\(DeviceName): Reset Comm called from \(From)")
+        Server = nil
+        ServerStarted = false
+        IStream = nil
+        OStream = nil
+        StreamOpenCount = 0
+        RegisteredName = nil
+        NetBrowser = nil
+        AuxDelegate = nil
+        RemoteServers.removeAll()
+    }
+    
+    /// Start the server.
     func Start()
     {
-        print("Initializing Comm object.")
+        print("\(DeviceName): Initializing Comm/server object.")
+        CloseStreams()
         Server = nil
         Server = NetService(domain: "local.", type: Comm.kTDebugBonjourType, name: UIDevice.current.name, port: Port)
         Server?.includesPeerToPeer = true
         Server?.delegate = self
         Server?.publish(options: NetService.Options.listenForConnections)
+        ServerStarted = true
+        print("\(DeviceName): Server started.")
     }
     
     func SearchForServices(DelayDuration: Double = 2.0)
     {
-        print("Initializing net service browser.")
+        print("\(DeviceName): Initializing net service browser with delay of \(DelayDuration) seconds.")
         RemoteServers.removeAll()
         NetBrowser = NetServiceBrowser()
         NetBrowser.includesPeerToPeer = true
         NetBrowser.delegate = self
         NetBrowser.searchForServices(ofType: Comm.kTDebugBonjourType, inDomain: "local.")
         Delay(DelayDuration, closure: {self.NetBrowser.stop()})
-        //NetBrowser.searchForBrowsableDomains()
     }
     
     func SearchForServices(Delegate: CommDelegate, DelayDuration: Double = 2.0) -> Bool
     {
         if AuxDelegate != nil
         {
-            print("AuxDelegate in use.")
+            print("\(DeviceName): AuxDelegate in use.")
             return false
         }
         AuxDelegate = Delegate
-        print("Initializing net service browser.")
+        print("\(DeviceName): Initializing net service browser with auxiliary delegate with delay of \(DelayDuration) seconds.")
         RemoteServers.removeAll()
         NetBrowser = NetServiceBrowser()
         NetBrowser.includesPeerToPeer = true
         NetBrowser.delegate = self
-        
         NetBrowser.searchForServices(ofType: Comm.kTDebugBonjourType, inDomain: "local.")
         Delay(DelayDuration, closure: {self.NetBrowser.stop()})
         return true
+    }
+    
+    func SearchForDomains(DelayDuration: Double = 5.0)
+    {
+        if AuxDelegate != nil
+        {
+            print("\(DeviceName): AuxDelegate in use.")
+            return
+        }
+        NetBrowser = NetServiceBrowser()
+        NetBrowser.includesPeerToPeer = true
+        NetBrowser.delegate = self
+        NetBrowser.searchForBrowsableDomains()
+        Delay(DelayDuration, closure: {self.NetBrowser.stop()})
     }
     
     //https://stackoverflow.com/questions/42717027/ios-bonjour-swift-3-search-never-stops
@@ -103,47 +138,114 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
         }
     }
     
-    func ConnectToRemote()
+    func ConnectToRemote(_ Remote: NetService)
     {
-        assert(Server != nil)
-        assert(IStream == nil)
-        assert(OStream == nil)
-        if (Server?.getInputStream(&IStream, outputStream: &OStream))!
+        print("Connecting to remote server: \(Remote.name)")
+        if IStream != nil || OStream != nil
         {
-            print("Opening streams.")
+            CloseStreams()
+        }
+        var InS: InputStream!
+        var OutS: OutputStream!
+        if Remote.getInputStream(&InS, outputStream: &OutS)
+        {
+            IStream = InS
+            OStream = OutS
             OpenStreams()
+        }
+        else
+        {
+            print("\(DeviceName): Error getting remote server streams. Restarting.")
+            Start()
         }
     }
     
+    /// Open the input and output streams.
     func OpenStreams()
     {
+        print("\(DeviceName): Opening streams.")
         assert(IStream != nil)
         assert(OStream != nil)
         assert(StreamOpenCount == 0)
         
         IStream?.delegate = self
-        IStream?.schedule(in: RunLoop.current, forMode: RunLoop.Mode.default)
+        IStream?.schedule(in: RunLoop.current, forMode: RunLoop.Mode.common)
         IStream?.open()
         
         OStream?.delegate = self
-        OStream?.schedule(in: RunLoop.current, forMode: RunLoop.Mode.default)
+        OStream?.schedule(in: RunLoop.current, forMode: RunLoop.Mode.common)
         OStream?.open()
     }
     
+    /// Close the input and output streams. If the streams are already closed, do nothing.
     func CloseStreams()
     {
-        assert((IStream != nil) == (OStream != nil))
-        if IStream != nil
+        print("\(DeviceName): Closing streams.")
+        if let IS = IStream
         {
-            //If IStream isn't nil, then OStream is also not nil (as per the assert above).
-            IStream?.remove(from: RunLoop.current, forMode: RunLoop.Mode.default)
-            IStream?.close()
+            IS.remove(from: RunLoop.current, forMode: RunLoop.Mode.common)
+            IS.close()
             IStream = nil
-            OStream?.remove(from: RunLoop.current, forMode: RunLoop.Mode.default)
-            OStream?.close()
+        }
+        if let OS = OStream
+        {
+            OS.remove(from: RunLoop.current, forMode: RunLoop.Mode.common)
+            OS.close()
             OStream = nil
         }
         StreamOpenCount = 0
+    }
+    
+    func SplitMessage(_ Raw: String) -> (String, String, String)
+    {
+        if Raw.isEmpty
+        {
+            return ("", "", "")
+        }
+        let Delimiter = String(Raw.first!)
+        let Parts = Raw.split(separator: String.Element(Delimiter), maxSplits: 3, omittingEmptySubsequences: true)
+        if Parts.count != 3
+        {
+            //Assume the last item in the parts list is the message and return only it.
+            return ("", "", String(Parts[Parts.count - 1]))
+        }
+        return (String(Parts[0]), String(Parts[1]), String(Parts[2]))
+    }
+    
+    func IsInString(_ InCommon: String, With: [String]) -> Bool
+    {
+        for SomeString in With
+        {
+            if SomeString.contains(InCommon)
+            {
+                return true
+            }
+        }
+        return false
+    }
+    
+    func GetUnusedDelimiter(From: [String]) -> String
+    {
+        for Delimiter in Delimiters
+        {
+            if !IsInString(Delimiter, With: From)
+            {
+                return Delimiter
+            }
+        }
+        return "\u{2}"
+    }
+    
+    let Delimiters = [",", ";", ".", "/", ":", "-", "_", "`", "~", "\"", "'", "$", "!", "\\", "¥", "°", "^", "·", "€", "‹", "›", "@"]
+    
+    func MakeMessageWithHeader(_ WithMessage: String) -> String
+    {
+        let Part1 = DeviceName
+        let Part2 = Comm.MakeTimeStamp(FromDate: Date())
+        let Part3 = WithMessage
+        let Delimiter = GetUnusedDelimiter(From: [Part1, Part2, Part3])
+        let Final = Delimiter + Part1 + Delimiter + Part2 + Delimiter + Part3
+        return Final
     }
     
     /// Send a message to the remote host.
@@ -151,23 +253,37 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
     /// - Parameter Message: The string message to send.
     func Send(Message: String)
     {
-        if OStream!.hasSpaceAvailable
+        print("\(DeviceName): Sending message to remote server.")
+        let Final = MakeMessageWithHeader(Message)
+        let Buffer: [UInt8] = Array(Final.utf8)
+        if Buffer.count < 1
         {
-            let Buffer: [UInt8] = Array(Message.utf8)
-            let BufferPointer = UnsafePointer(Buffer)
-            let Written = OStream?.write(BufferPointer, maxLength: Buffer.count)
-            if Written != Buffer.count
-            {
-                //Is this bad?
-            }
+            print("\(DeviceName): Empty message attempted to be sent to remote system.")
+            return
         }
+        let BufferPointer = UnsafePointer(Buffer)
+        print("\(DeviceName): Sending \(Final): \(Buffer.count) bytes")
+        let Written: Int = (OStream?.write(BufferPointer, maxLength: Buffer.count))!
+        if Written == -1
+        {
+            print("\(DeviceName): Write error: \(OStream!.streamError!.localizedDescription)")
+            return
+        }
+        if Written == 0
+        {
+            print("\(DeviceName): OutputStream at capacity.")
+        }
+        print("\(DeviceName): Wrote \(Written) bytes. Source size=\(Message.count)")
     }
     
     func stream(_ aStream: Stream, handle eventCode: Stream.Event)
     {
+        let IsInputStream = aStream == IStream
+        print("\(DeviceName): Stream event code: \(eventCode), IsInput: \(IsInputStream)")
         switch eventCode
         {
         case Stream.Event.openCompleted:
+            print("\(DeviceName): Stream.Event.openCompleted")
             StreamOpenCount = StreamOpenCount + 1
             assert(StreamOpenCount <= 2)
             if StreamOpenCount == 2
@@ -180,30 +296,62 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
             }
             
         case Stream.Event.hasSpaceAvailable:
+            print("\(DeviceName): Stream.Event.hasSpaceAvailable")
             break
             
         case Stream.Event.hasBytesAvailable:
-            var Buffer = [UInt8](repeating: 0, count: 1024)
-            let BufferPointer = UnsafeMutablePointer<UInt8>.allocate(capacity: Buffer.count)
-            BufferPointer.initialize(from: &Buffer, count: Buffer.count)
-            let BytesRead = IStream?.read(BufferPointer, maxLength: Buffer.count)
-            if let Message = String(bytes: Buffer, encoding: String.Encoding.utf8)
+            //Receive data here.
+            if let IsIn = aStream as? InputStream
             {
-                print("Received message: \(Message)")
-                CallerDelegate?.RawDataReceived(Message, BytesRead!)
+                //https://stackoverflow.com/questions/42561020/reading-an-inputstream-into-a-data-object
+                print("\(DeviceName): Stream.Event.hasBytesAvailable")
+                let Buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
+                var ByteCount: Int = 0
+                while IsIn.hasBytesAvailable
+                {
+                     ByteCount = IsIn.read(Buffer, maxLength: 1024)
+                    if ByteCount == -1
+                    {
+                        print("Error reading InputBuffer: \(IsIn.streamError!.localizedDescription)")
+                    }
+                }
+                var Message = String(cString: Buffer)
+                //String(cString) sometimes seems to pad extraneous characters/junk to the end of the string so we
+                //need to check how many bytes the InputStream things it sent versus the number of characters
+                //String(cString) is and truncate the result of String(cString) if needed. This raises the question:
+                //does String(cString) also report too _few_ characters?
+                let ExtraneousCharacterCount = Message.count - ByteCount
+                if ExtraneousCharacterCount > 0
+                {
+                    Message.removeLast(ExtraneousCharacterCount)
+                    print("Fixed message length (reduced by \(ExtraneousCharacterCount) characters.")
+                }
+                Buffer.deallocate()
+                print("\(DeviceName): Received message: \"\(Message)\", bytes read: \(ByteCount), string count: \(Message.count)")
+                CallerDelegate?.RawDataReceived(Message, ByteCount)
+                Start()
             }
             
+        case Stream.Event.errorOccurred:
+            let Error: String = aStream.streamError!.localizedDescription
+            print("\(DeviceName): Stream.Event.errorOccurred: \(Error)")
+            
+        case Stream.Event.endEncountered:
+            print("\(DeviceName): Stream.Event.endEncountered")
+            
         default:
+            print("\(DeviceName): Unhandled event: \(eventCode)")
             break
         }
     }
     
     func netServiceDidPublish(_ sender: NetService)
     {
+        print("\(DeviceName): At netServiceDidPublish")
         assert(sender == Server)
         RegisteredName = Server?.name
-        print("RegisteredName=\(RegisteredName!)")
-        SearchForServices()
+        print("\(DeviceName): RegisteredName=\(RegisteredName!)")
+        //SearchForServices()
     }
     
     func netService(_ sender: NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream)
@@ -211,7 +359,7 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
         OperationQueue.current!.addOperation(
             {
                 assert(sender == self.Server)
-                print("Accepted connection: Host=\(sender.hostName!).")
+                print("\(self.DeviceName): Accepted connection.")
                 assert((self.IStream != nil) == (self.OStream != nil))
                 if self.IStream != nil
                 {
@@ -237,33 +385,33 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
     {
         if service.name == RegisteredName
         {
-            print("Found self.")
+            print("\(DeviceName): Found self.")
             return
         }
-        print("Found: \(service.name) in domain \(service.domain) on host \(service.hostName ?? "{unknown}")")
-        RemoteServers.append(service.name)
+        print("\(DeviceName): Found: \(service.name) in domain \(service.domain) on host \(service.hostName ?? "{unknown}")")
+        RemoteServers.append((service.name, service))
     }
     
     func netServiceBrowser(_ browser: NetServiceBrowser, didFindDomain domainString: String, moreComing: Bool)
     {
-        print("Found domain: \(domainString)")
+        print("\(DeviceName): Found domain: \(domainString)")
     }
     
     func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String : NSNumber])
     {
         let NSServicesErrorCode: Int = Int(truncating: errorDict["NSNetServicesErrorCode"]!)
         let NSDomainErrorCode: Int = Int(truncating: errorDict["NSNetServicesErrorDomain"]!)
-        print("Error searching from net service browser. Code=\(NSServicesErrorCode), Domain Error=\(NSDomainErrorCode)")
+        print("\(DeviceName): Error searching from net service browser. Code=\(NSServicesErrorCode), Domain Error=\(NSDomainErrorCode)")
     }
     
     func netServiceBrowserWillSearch(_ browser: NetServiceBrowser)
     {
-        print("Started searching.")
+        print("\(DeviceName): Started searching.")
     }
     
     func netServiceBrowserDidStopSearch(_ browser: NetServiceBrowser)
     {
-        print("Stopped searching.")
+        print("\(DeviceName): Stopped searching.")
         if AuxDelegate != nil
         {
             AuxDelegate?.RemoteServerList(RemoteServers)
@@ -285,17 +433,18 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
         if !ServerStarted
         {
             Start()
-            print("Server restarted.")
+            print("\(DeviceName): Server restarted.")
         }
     }
     
     func HandleEnteredBackground()
     {
         CloseStreams()
-        if !ServerStarted
+        if let CurrentServer = Server
         {
-            Server?.publish(options: NetService.Options.listenForConnections)
-            ServerStarted = true
+            CurrentServer.stop()
+            ServerStarted = false
+            RegisteredName = nil
         }
     }
 }
