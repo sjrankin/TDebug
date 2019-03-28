@@ -36,6 +36,12 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="BeJ-hv-bWk"/>
+                                    <barButtonItem title="TEST" id="xSP-Nd-ZsQ">
+                                        <connections>
+                                            <action selector="HandleTestButton:" destination="BYZ-38-t0r" id="ncu-OA-Ytv"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="lZz-fm-EL4"/>
                                     <barButtonItem systemItem="stop" id="z10-wX-Tak">
                                         <connections>
                                             <action selector="HandleDisconnectButton:" destination="BYZ-38-t0r" id="lvj-Kd-Myn"/>
@@ -54,6 +60,12 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="0eY-HS-2fW"/>
+                                    <barButtonItem systemItem="refresh" id="pSv-EC-Y0r">
+                                        <connections>
+                                            <action selector="HandleRefreshButton:" destination="BYZ-38-t0r" id="fCU-Se-taQ"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="Z4A-nq-cow"/>
                                     <barButtonItem title="Send" id="XO3-yg-mS2">
                                         <connections>
                                             <action selector="HandleSendButton:" destination="BYZ-38-t0r" id="RLl-Sv-8fY"/>
