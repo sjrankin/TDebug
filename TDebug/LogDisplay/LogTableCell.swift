@@ -55,6 +55,24 @@ class LogTableCell: UITableViewCell
         {
             ValueLabel.textColor = FGColor
         }
+        if TheItem.DoAnimateBGColor
+        {
+            if TheItem.HasAnimated
+            {
+                self.backgroundColor = TheItem.BGAnimateTargetColor
+            }
+            else
+            {
+                UIView.animate(withDuration: TheItem.BGAnimateColorDuration, animations:
+                    {
+                        self.backgroundColor = self.TheItem.BGAnimateTargetColor
+                }, completion:
+                    {
+                        _ in
+                        self.TheItem.HasAnimated = true
+                })
+            }
+        }
     }
     
     public func GetID() -> UUID
