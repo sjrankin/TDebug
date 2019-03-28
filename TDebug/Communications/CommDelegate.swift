@@ -11,5 +11,5 @@ import Foundation
 protocol CommDelegate: class
 {
     func RawDataReceived(_ RawData: String, _ BytesRead: Int)
-    func RemoteServerList( _ List: [String])
+    func RemoteServerList( _ List: [(String, NetService)])
 }
