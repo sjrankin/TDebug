@@ -9,16 +9,35 @@
 import Foundation
 import UIKit
 
-class ManualConnectCode: UITableViewController, ManualConnectProtocol
+class ManualConnectCode: UIViewController, ManualConnectProtocol, CommDelegate,
+    UITableViewDelegate, UITableViewDataSource
 {
+    var TComm: Comm!
     weak var ParentDelegate: ManualConnectProtocol? = nil
     
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        let AppDel = UIApplication.shared.delegate as! AppDelegate
+        TComm = AppDel.TComm
         
-        let count: Int = HostNames!.count
-        print("At ManualConnectCode. HostNamesCount=\(count)")
+        WaitingIndicator.color = UIColor(named: "Pistachio")
+        WaitingIndicator.startAnimating()
+        WaitingIndicator.isHidden = false
+        
+        ServerTable.layer.cornerRadius = 5.0
+        ServerTable.layer.borderColor = UIColor.black.cgColor
+        ServerTable.layer.borderWidth = 0.5
+        ServerTable.delegate = self
+        ServerTable.dataSource = self
+        
+        let OK = TComm.SearchForServices(Delegate: self)
+        if (!OK)
+        {
+            print("Comm class busy.")
+        }
+        
+        //self.tableView.tableFooterView = UIView()
     }
     
     private var _HostNames: [String]? = nil
@@ -39,7 +58,7 @@ class ManualConnectCode: UITableViewController, ManualConnectProtocol
         //Not used in this class.
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         if let Names = HostNames
         {
@@ -48,7 +67,7 @@ class ManualConnectCode: UITableViewController, ManualConnectProtocol
         return 0
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
         if HostNames == nil
         {
@@ -59,7 +78,7 @@ class ManualConnectCode: UITableViewController, ManualConnectProtocol
         return Cell
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
         if let Names = HostNames
         {
@@ -74,14 +93,26 @@ class ManualConnectCode: UITableViewController, ManualConnectProtocol
     
     @IBAction func HandleRefreshButton(_ sender: Any)
     {
-        HostNames = ParentDelegate?.RefreshList()
-        self.tableView.reloadData()
+        HostNames?.removeAll()
+        ServerTable.reloadData()
+        WaitingIndicator.isHidden = false
+        let OK = TComm.SearchForServices(Delegate: self)
+        if (!OK)
+        {
+            print("Comm class busy.")
+        }
     }
     
-    func RefreshList() -> [String]
+    func RawDataReceived(_ RawData: String, _ BytesRead: Int)
     {
         //Not used in this class.
-        return [String]()
+    }
+    
+    func RemoteServerList(_ List: [String])
+    {
+        HostNames = List
+        WaitingIndicator.isHidden = true
+        ServerTable.reloadData()
     }
     
     @IBAction func HandleBackButton(_ sender: Any)
@@ -89,4 +120,7 @@ class ManualConnectCode: UITableViewController, ManualConnectProtocol
         ParentDelegate?.SetSelectedHost(HostName: "")
         dismiss(animated: true, completion: nil)
     }
+    
+    @IBOutlet weak var WaitingIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var ServerTable: UITableView!
 }
