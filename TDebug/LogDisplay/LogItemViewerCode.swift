@@ -40,7 +40,7 @@ class LogItemViewerCode: UIViewController, LogItemProtocol
     {
         dismiss(animated: true, completion: nil)
     }
-    
+
     @IBOutlet weak var FontSizeDisplay: UIBarButtonItem!
     @IBOutlet weak var ItemIDLabel: UILabel!
     @IBOutlet weak var TimeStampLabel: UILabel!
