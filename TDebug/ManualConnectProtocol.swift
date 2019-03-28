@@ -11,6 +11,4 @@ import Foundation
 protocol ManualConnectProtocol: class
 {
     func SetSelectedHost(HostName: String)
-    var HostNames: [String]? {get set}
-    func RefreshList() -> [String]
 }
