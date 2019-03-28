@@ -28,6 +28,7 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
     var RegisteredName: String? = nil
     var NetBrowser: NetServiceBrowser!
     weak var CallerDelegate: CommDelegate? = nil
+    weak var AuxDelegate: CommDelegate? = nil
     var RemoteServers = [String]()
     
     override init()
@@ -45,7 +46,7 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
         Server?.publish(options: NetService.Options.listenForConnections)
     }
     
-    func SearchForServices()
+    func SearchForServices(DelayDuration: Double = 2.0)
     {
         print("Initializing net service browser.")
         RemoteServers.removeAll()
@@ -53,7 +54,39 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
         NetBrowser.includesPeerToPeer = true
         NetBrowser.delegate = self
         NetBrowser.searchForServices(ofType: Comm.kTDebugBonjourType, inDomain: "local.")
+        Delay(DelayDuration, closure: {self.NetBrowser.stop()})
         //NetBrowser.searchForBrowsableDomains()
+    }
+    
+    func SearchForServices(Delegate: CommDelegate, DelayDuration: Double = 2.0) -> Bool
+    {
+        if AuxDelegate != nil
+        {
+            print("AuxDelegate in use.")
+            return false
+        }
+        AuxDelegate = Delegate
+        print("Initializing net service browser.")
+        RemoteServers.removeAll()
+        NetBrowser = NetServiceBrowser()
+        NetBrowser.includesPeerToPeer = true
+        NetBrowser.delegate = self
+        
+        NetBrowser.searchForServices(ofType: Comm.kTDebugBonjourType, inDomain: "local.")
+        Delay(DelayDuration, closure: {self.NetBrowser.stop()})
+        return true
+    }
+    
+    //https://stackoverflow.com/questions/42717027/ios-bonjour-swift-3-search-never-stops
+    func Delay(_ Duration: Double, closure: @escaping () -> ())
+    {
+        let When = DispatchTime.now() + Duration
+        DispatchQueue.main.asyncAfter(deadline: When, execute: closure)
+    }
+    
+    func AuxIsBusy() -> Bool
+    {
+        return AuxDelegate != nil
     }
     
     private var _Port: Int32 = 0
@@ -209,11 +242,6 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
         }
         print("Found: \(service.name) in domain \(service.domain) on host \(service.hostName ?? "{unknown}")")
         RemoteServers.append(service.name)
-        if !moreComing
-        {
-            NetBrowser.stop()
-            CallerDelegate?.RemoteServerList(RemoteServers)
-        }
     }
     
     func netServiceBrowser(_ browser: NetServiceBrowser, didFindDomain domainString: String, moreComing: Bool)
@@ -236,6 +264,15 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
     func netServiceBrowserDidStopSearch(_ browser: NetServiceBrowser)
     {
         print("Stopped searching.")
+        if AuxDelegate != nil
+        {
+            AuxDelegate?.RemoteServerList(RemoteServers)
+            AuxDelegate = nil
+        }
+        else
+        {
+            CallerDelegate?.RemoteServerList(RemoteServers)
+        }
     }
     
     func netService(_ sender: NetService, didNotPublish errorDict: [String : NSNumber])
