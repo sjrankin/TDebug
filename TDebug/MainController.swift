@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource,
-    CommDelegate, ManualConnectProtocol
+    CommDelegate, ManualConnectProtocol, MultiPeerDelegate
 {
     var HostNames: [String]? = nil
     
@@ -18,11 +18,15 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     let StatusTableTag = 200
     let LogTableTag = 300
     var TComm: Comm!
+    var MPMgr: MultiPeerManager!
     
     override func viewDidLoad()
     {
         super.viewDidLoad()
         InitializeUI()
+        
+        MPMgr = MultiPeerManager()
+        MPMgr.Delegate = self
         
         IDTable.delegate = self
         IDTable.dataSource = self
@@ -51,16 +55,18 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         SomeItem.BGColor = UIColor(named: "Lavender")
         LogList.append(SomeItem)
         
+        #if false
         let AppDel = UIApplication.shared.delegate as! AppDelegate
         TComm = AppDel.TComm
         TComm.CallerDelegate = self
         TComm.Start()
         TComm.SearchForServices()
+        #endif
         
         //Show inital values in the UI.
         AddStatusData("Status", "Waiting for connection")
         AddStatusData("Type", Comm.kTDebugBonjourType)
-        AddStatusData("Port", "\(TComm.Port)")
+        //AddStatusData("Port", "\(TComm.Port)")
         SetIdiotLight("A", 1, "Not Connected", UIColor.white, UIColor(red: 0.5, green: 0.0, blue: 0.0, alpha: 1.0))
         EnableIdiotLight("A", 2, false)
         EnableIdiotLight("A", 3, false)
@@ -95,6 +101,28 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         let Parts = Name.split(separator: ".")
         return String(Parts[0])
+    }
+    
+    func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [String])
+    {
+        for DeviceName in ConnectedDevices
+        {
+            print("\(DeviceName) changed state.")
+        }
+    }
+    
+    func ReceivedData(Manager: MultiPeerManager, RawData: String)
+    {
+        OperationQueue.main.addOperation {
+        let Item = LogItem(Text: RawData)
+        Item.BGColor = UIColor(named: "Tomato")
+        Item.BGAnimateTargetColor = UIColor.white
+        Item.BGAnimateColorDuration = 2.0
+        Item.DoAnimateBGColor = true
+        self.LogList.append(Item)
+        self.LogTable.reloadData()
+        self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0), at: UITableView.ScrollPosition.bottom, animated: true)
+        }
     }
     
     func SetSelectedHost(HostName: String, Server: NetService?)
@@ -145,12 +173,12 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     @objc func EnteredBackground(_ notification: Notification)
     {
-        TComm.HandleEnteredBackground()
+        //TComm.HandleEnteredBackground()
     }
     
     @objc func EnteredForeground(_ notification: Notification)
     {
-        TComm.HandleEnteredForeground()
+        //TComm.HandleEnteredForeground()
     }
     
     func InitializeUI()
@@ -450,6 +478,10 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     @IBAction func HandleTestButton(_ sender: Any)
     {
+        #if true
+        MPMgr.Send(Message: "Test \(TestCount)")
+        TestCount = TestCount + 1
+        #else
         if CurrentHost.isEmpty
         {
             MustSelectHostFirst()
@@ -458,6 +490,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         TComm.ConnectToRemote(CurrentServer!)
         TComm.Send(Message: "Test \(TestCount)")
         TestCount = TestCount + 1
+        #endif
     }
     
     var TestCount: Int = 1
@@ -471,7 +504,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     @IBAction func HandleRefreshButton(_ sender: Any)
     {
-        TComm.SearchForServices()
+        //TComm.SearchForServices()
     }
     
     var IDList = [(String, String)]()
