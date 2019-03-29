@@ -276,6 +276,20 @@ class Comm: NSObject, NetServiceDelegate, NetServiceBrowserDelegate, StreamDeleg
         print("\(DeviceName): Wrote \(Written) bytes. Source size=\(Message.count)")
     }
     
+    func Send(To: NetService, Message: String)
+    {
+        print("\(DeviceName): Sending message to other remote server.")
+        let Final = MakeMessageWithHeader(Message)
+        let Buffer: [UInt8] = Array(Final.utf8)
+        if Buffer.count < 1
+        {
+            print("\(DeviceName): Empty message attempted to be sent to remote system.")
+            return
+        }
+        let BufferPointer = UnsafePointer(Buffer)
+        print("\(DeviceName): Sending \(Final): \(Buffer.count) bytes")
+    }
+    
     func stream(_ aStream: Stream, handle eventCode: Stream.Event)
     {
         let IsInputStream = aStream == IStream
