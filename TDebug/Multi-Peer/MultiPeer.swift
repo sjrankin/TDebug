@@ -9,6 +9,8 @@
 import Foundation
 import MultipeerConnectivity
 
+/// Class that manages multi-peer communications.
+/// [Multipeer-Connectivity](https://www.ralfebert.de/ios/tutorials/multipeer-connectivity/)
 class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate
 {
     private let TDebugServiceType = "debug-sink"
@@ -42,19 +44,52 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         ServiceBrower.stopBrowsingForPeers()
     }
     
+    private var _IsDebugHost: Bool = false
+    public var IsDebugHost: Bool
+    {
+        get
+        {
+            return _IsDebugHost
+        }
+        set
+        {
+            _IsDebugHost = newValue
+        }
+    }
+    
     func Send(Message: String)
     {
         if Session.connectedPeers.count > 0
         {
             do
             {
-                try Session.send(Message.data(using: String.Encoding.utf8)!, toPeers: Session.connectedPeers, with: .reliable)
+                let EncodedMessage = MessageHelper.MakeMessage(Message, GetDeviceName())
+                print("Sending \(EncodedMessage)")
+                try Session.send(EncodedMessage.data(using: String.Encoding.utf8)!, toPeers: Session.connectedPeers, with: .reliable)
             }
             catch
             {
                 print("Error sending message: \(error.localizedDescription)")
             }
         }
+    }
+    
+    func Send(To: MCPeerID, Message: String)
+    {
+        do
+        {
+            let EncodedMessage = MessageHelper.MakeMessage(Message, GetDeviceName())
+            try Session.send(EncodedMessage.data(using: String.Encoding.utf8)!, toPeers: [To], with: .reliable)
+        }
+        catch
+        {
+            print("Error sending message to \(To.displayName): \(error.localizedDescription)")
+        }
+    }
+    
+    func GetPeerList() -> [MCPeerID]
+    {
+        return Session.connectedPeers
     }
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error)
@@ -87,14 +122,14 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState)
     {
         print("Peer \(peerID) changed state: \(state.rawValue)")
-        Delegate?.ConnectedDeviceChanged(Manager: self, ConnectedDevices: Session.connectedPeers.map{$0.displayName})
+        Delegate?.ConnectedDeviceChanged(Manager: self, ConnectedDevices: Session.connectedPeers,
+                                         Changed: peerID, NewState: state)
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID)
     {
-        print("Received data from \(peerID)")
         let Message = String(data: data, encoding: .utf8)
-        Delegate?.ReceivedData(Manager: self, RawData: Message!)
+        Delegate?.ReceivedData(Manager: self, Peer: peerID, RawData: Message!)
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID)
@@ -111,4 +146,24 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
     {
         print("Finished receiving resource from \(peerID)")
     }
+    
+    func GetDeviceName() -> String
+    {
+        if let TheName = TheDeviceName
+        {
+            return TheName
+        }
+        var SysInfo = utsname()
+        uname(&SysInfo)
+        let Name = withUnsafePointer(to: &SysInfo.nodename.0)
+        {
+            ptr in
+            return String(cString: ptr)
+        }
+        let Parts = Name.split(separator: ".")
+        TheDeviceName = String(Parts[0])
+        return TheDeviceName!
+    }
+    
+    var TheDeviceName: String? = nil
 }
