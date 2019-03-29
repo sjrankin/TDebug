@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		171A2DEF224DD54000B3D556 /* MultiPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DEE224DD54000B3D556 /* MultiPeer.swift */; };
 		171A2DF1224DDFED00B3D556 /* MultiPeerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */; };
+		171A2DF5224DF3E100B3D556 /* MessageHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DF4224DF3E100B3D556 /* MessageHelper.swift */; };
+		171A2DF8224E091400B3D556 /* SendToRemoteCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DF7224E091400B3D556 /* SendToRemoteCode.swift */; };
+		171A2DFC224E0AC600B3D556 /* MainProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DFB224E0AC600B3D556 /* MainProtocol.swift */; };
+		171A2DFF224E39BC00B3D556 /* ClientTestUI.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 171A2DFE224E39BC00B3D556 /* ClientTestUI.storyboard */; };
+		171A2E01224E40A700B3D556 /* ClientTestUICode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2E00224E40A700B3D556 /* ClientTestUICode.swift */; };
 		1734ABE422487F80007059F3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABE322487F80007059F3 /* AppDelegate.swift */; };
 		1734ABE922487F80007059F3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1734ABE722487F80007059F3 /* Main.storyboard */; };
 		1734ABEB22487F81007059F3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1734ABEA22487F81007059F3 /* Assets.xcassets */; };
@@ -43,6 +48,11 @@
 /* Begin PBXFileReference section */
 		171A2DEE224DD54000B3D556 /* MultiPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiPeer.swift; sourceTree = "<group>"; };
 		171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiPeerDelegate.swift; sourceTree = "<group>"; };
+		171A2DF4224DF3E100B3D556 /* MessageHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageHelper.swift; sourceTree = "<group>"; };
+		171A2DF7224E091400B3D556 /* SendToRemoteCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendToRemoteCode.swift; sourceTree = "<group>"; };
+		171A2DFB224E0AC600B3D556 /* MainProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainProtocol.swift; sourceTree = "<group>"; };
+		171A2DFE224E39BC00B3D556 /* ClientTestUI.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ClientTestUI.storyboard; sourceTree = "<group>"; };
+		171A2E00224E40A700B3D556 /* ClientTestUICode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientTestUICode.swift; sourceTree = "<group>"; };
 		1734ABE022487F80007059F3 /* TDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1734ABE322487F80007059F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1734ABE822487F80007059F3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -92,8 +102,27 @@
 			children = (
 				171A2DEE224DD54000B3D556 /* MultiPeer.swift */,
 				171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */,
+				171A2DF4224DF3E100B3D556 /* MessageHelper.swift */,
 			);
 			path = "Multi-Peer";
+			sourceTree = "<group>";
+		};
+		171A2DF6224E08F800B3D556 /* SendTo */ = {
+			isa = PBXGroup;
+			children = (
+				1734AC012248CDB6007059F3 /* SendToRemote.storyboard */,
+				171A2DF7224E091400B3D556 /* SendToRemoteCode.swift */,
+			);
+			path = SendTo;
+			sourceTree = "<group>";
+		};
+		171A2DFD224E39A200B3D556 /* ClientTest */ = {
+			isa = PBXGroup;
+			children = (
+				171A2DFE224E39BC00B3D556 /* ClientTestUI.storyboard */,
+				171A2E00224E40A700B3D556 /* ClientTestUICode.swift */,
+			);
+			path = ClientTest;
 			sourceTree = "<group>";
 		};
 		1734ABD722487F80007059F3 = {
@@ -120,16 +149,18 @@
 				1734ABE322487F80007059F3 /* AppDelegate.swift */,
 				1734ABE722487F80007059F3 /* Main.storyboard */,
 				1734ABF5224883D3007059F3 /* MainController.swift */,
-				1734AC012248CDB6007059F3 /* SendToRemote.storyboard */,
 				1734ABF92248889C007059F3 /* IDTableCell.swift */,
 				1734ABFB22488CD9007059F3 /* StatusTableCell.swift */,
 				1734ABEC22487F81007059F3 /* LaunchScreen.storyboard */,
 				17EF4160224BAE440008EB83 /* Versioning.swift */,
+				171A2DFD224E39A200B3D556 /* ClientTest */,
+				171A2DF6224E08F800B3D556 /* SendTo */,
 				171A2DED224DD52600B3D556 /* Multi-Peer */,
 				178348F0224C8B250074D7BA /* ManualConnect */,
 				17EF415D224B8FC20008EB83 /* LogDisplay */,
 				17EF4156224B64860008EB83 /* Communications */,
 				177FAB29224A46B500379A4C /* Commands */,
+				171A2DFB224E0AC600B3D556 /* MainProtocol.swift */,
 			);
 			path = TDebug;
 			sourceTree = "<group>";
@@ -249,6 +280,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				171A2DFF224E39BC00B3D556 /* ClientTestUI.storyboard in Resources */,
 				1734ABEE22487F81007059F3 /* LaunchScreen.storyboard in Resources */,
 				1734ABEB22487F81007059F3 /* Assets.xcassets in Resources */,
 				17EF4158224B71F50008EB83 /* LogItemViewer.storyboard in Resources */,
@@ -288,13 +320,16 @@
 				177FAB2B224A46CB00379A4C /* CommandObject.swift in Sources */,
 				1734ABF82248862A007059F3 /* LogItem.swift in Sources */,
 				17EF4155224B2FF10008EB83 /* ManualConnectProtocol.swift in Sources */,
+				171A2DF5224DF3E100B3D556 /* MessageHelper.swift in Sources */,
 				171A2DF1224DDFED00B3D556 /* MultiPeerDelegate.swift in Sources */,
 				177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */,
 				177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */,
 				1734ABF6224883D3007059F3 /* MainController.swift in Sources */,
 				177FAB34224A4B2700379A4C /* CommandObjectProtocol.swift in Sources */,
 				1734ABFC22488CD9007059F3 /* StatusTableCell.swift in Sources */,
+				171A2DF8224E091400B3D556 /* SendToRemoteCode.swift in Sources */,
 				17EF4153224B2E490008EB83 /* ManualConnectCode.swift in Sources */,
+				171A2E01224E40A700B3D556 /* ClientTestUICode.swift in Sources */,
 				1734ABE422487F80007059F3 /* AppDelegate.swift in Sources */,
 				177FAB28224A468A00379A4C /* CommandParser.swift in Sources */,
 				177FAB26224A250C00379A4C /* CommDelegate.swift in Sources */,
@@ -307,6 +342,7 @@
 				17EF415F224B97AD0008EB83 /* CommStatic.swift in Sources */,
 				177FAB36224A58A400379A4C /* Command_AddToID.swift in Sources */,
 				177FAB38224A592100379A4C /* Command_DisableIdiotLight.swift in Sources */,
+				171A2DFC224E0AC600B3D556 /* MainProtocol.swift in Sources */,
 				1734ABFE22488DCB007059F3 /* LogTableCell.swift in Sources */,
 				177FAB2F224A47E000379A4C /* Command.swift in Sources */,
 				17EF4161224BAE440008EB83 /* Versioning.swift in Sources */,
