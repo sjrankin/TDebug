@@ -8,9 +8,10 @@
 
 import Foundation
 import UIKit
+import MultipeerConnectivity
 
 class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource,
-    CommDelegate, ManualConnectProtocol, MultiPeerDelegate
+    /*CommDelegate, ManualConnectProtocol,*/ MultiPeerDelegate, MainProtocol
 {
     var HostNames: [String]? = nil
     
@@ -52,6 +53,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let SomeItem = LogItem(ItemID: UUID(),
                                TimeStamp: Comm.MakeTimeStamp(FromDate: Date()),
                                Text: Versioning.MakeVersionBlock() + "\n" + "Running on \(GetDeviceName())")
+        SomeItem.HostName = "local"
         SomeItem.BGColor = UIColor(named: "Lavender")
         LogList.append(SomeItem)
         
@@ -77,6 +79,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         EnableIdiotLight("C", 2, false)
         EnableIdiotLight("C", 3, false)
         
+        #if false
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(EnteredBackground),
                                                name: UIApplication.willResignActiveNotification,
@@ -85,6 +88,15 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
                                                selector: #selector(EnteredForeground),
                                                name: UIApplication.willEnterForegroundNotification,
                                                object: nil)
+        #endif
+    }
+    
+    var MPManager: MultiPeerManager
+    {
+        get
+        {
+            return MPMgr
+        }
     }
     
     /// Returns the name of the device. In this case, "name" means the name the user gave the device.
@@ -103,28 +115,88 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return String(Parts[0])
     }
     
-    func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [String])
+    func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [MCPeerID], Changed: MCPeerID, NewState: MCSessionState)
     {
-        for DeviceName in ConnectedDevices
+        let ChangedPeerName = Changed.displayName
+        var NewStateName = ""
+        switch NewState
         {
-            print("\(DeviceName) changed state.")
+        case MCSessionState.notConnected:
+            NewStateName = "Not Connected"
+            
+        case MCSessionState.connecting:
+            NewStateName = "Connecting"
+            
+        case MCSessionState.connected:
+            NewStateName = "Connected"
+            
+        default:
+            NewStateName = "undetermined"
         }
+        print("Device \(ChangedPeerName) is now \"\(NewStateName)\"")
     }
     
-    func ReceivedData(Manager: MultiPeerManager, RawData: String)
+    func DelaySomething(_ BySeconds: Double, Closure: @escaping() -> ())
     {
-        OperationQueue.main.addOperation {
-        let Item = LogItem(Text: RawData)
-        Item.BGColor = UIColor(named: "Tomato")
-        Item.BGAnimateTargetColor = UIColor.white
-        Item.BGAnimateColorDuration = 2.0
-        Item.DoAnimateBGColor = true
-        self.LogList.append(Item)
-        self.LogTable.reloadData()
-        self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0), at: UITableView.ScrollPosition.bottom, animated: true)
+        let When = DispatchTime.now() + BySeconds
+        OperationQueue.main.addOperation
+            {
+                DispatchQueue.main.asyncAfter(deadline: When, execute: Closure)
         }
     }
     
+    func DisplayHeartbeatData(_ Raw: String, TimeStamp: String, Host: String, Peer: MCPeerID)
+    {
+        if let (NextExpected, Payload) = MessageHelper.DecodeHeartbeat(Raw)
+        {
+            OperationQueue.main.addOperation
+                {
+                    var HBMessage = "Received heartbeat. Next expected in \(NextExpected) seconds."
+                    if let FinalPayload = Payload
+                    {
+                        HBMessage = HBMessage + "\n" + FinalPayload
+                    }
+                    let Item = LogItem(TimeStamp: TimeStamp, Host: Host, Text: HBMessage)
+                    Item.BGColor = UIColor(named: "Tomato")
+                    Item.BGAnimateTargetColor = UIColor.white
+                    Item.BGAnimateColorDuration = 2.0
+                    Item.DoAnimateBGColor = true
+                    self.LogList.append(Item)
+                    self.LogTable.reloadData()
+                    self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
+                                              at: UITableView.ScrollPosition.bottom, animated: true)
+            }
+        }
+    }
+    
+    func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String)
+    {
+        let (MessageType, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
+        if (MessageType == .EchoMessage)
+        {
+            DelaySomething(2.0, Closure: {self.MPMgr.Send(To: Peer, Message: FinalMessage)})
+            return
+        }
+        if (MessageType == .Heartbeat)
+        {
+            DisplayHeartbeatData(FinalMessage, TimeStamp: TimeStamp, Host: HostName, Peer: Peer)
+            return
+        }
+        OperationQueue.main.addOperation
+            {
+                let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: FinalMessage)
+                Item.BGColor = UIColor(named: "Tomato")
+                Item.BGAnimateTargetColor = UIColor.white
+                Item.BGAnimateColorDuration = 2.0
+                Item.DoAnimateBGColor = true
+                self.LogList.append(Item)
+                self.LogTable.reloadData()
+                self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
+                                          at: UITableView.ScrollPosition.bottom, animated: true)
+        }
+    }
+    
+    #if false
     func SetSelectedHost(HostName: String, Server: NetService?)
     {
         if HostName.isEmpty
@@ -180,6 +252,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         //TComm.HandleEnteredForeground()
     }
+    #endif
     
     func InitializeUI()
     {
@@ -423,10 +496,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
     }
     
-    @IBAction func HandleSendButton(_ sender: Any)
-    {
-    }
-    
     @IBAction func HandleActionButton(_ sender: Any)
     {
     }
@@ -452,21 +521,29 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         switch segue.identifier
         {
-        case "ToConnector":
-            if let Dest = segue.destination as? ManualConnectCode
-            {
-                Dest.ParentDelegate = self
-            }
-            else
-            {
-                print("Error running connector view.")
-                return
-            }
+            /*
+             case "ToConnector":
+             if let Dest = segue.destination as? ManualConnectCode
+             {
+             Dest.ParentDelegate = self
+             }
+             else
+             {
+             print("Error running connector view.")
+             return
+             }
+             */
             
         case "ToLogItemViewer":
             if let Dest = segue.destination as? LogItemViewerCode
             {
                 Dest.DisplayItem = GetLogItem(TappedLogItemID)
+            }
+            
+        case "SendToRemote":
+            if let Dest = segue.destination as? SendToRemoteCode
+            {
+                Dest.Main = self
             }
             
         default:
@@ -500,11 +577,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let Alert = UIAlertController(title: "No Host", message: "You must select a host first.", preferredStyle: UIAlertController.Style.alert)
         Alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
         present(Alert, animated: true)
-    }
-    
-    @IBAction func HandleRefreshButton(_ sender: Any)
-    {
-        //TComm.SearchForServices()
     }
     
     var IDList = [(String, String)]()
