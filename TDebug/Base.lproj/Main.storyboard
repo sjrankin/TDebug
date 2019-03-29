@@ -35,7 +35,13 @@
                                             <action selector="HandleClearLogButton:" destination="BYZ-38-t0r" id="Mug-jL-dU8"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="BeJ-hv-bWk"/>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="8Vy-cA-ytw"/>
+                                    <barButtonItem title="Client Test" id="h8J-wD-UiA">
+                                        <connections>
+                                            <segue destination="mbt-94-etS" kind="show" id="aYp-Pd-asq"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="vMe-a4-lMa"/>
                                     <barButtonItem title="TEST" id="xSP-Nd-ZsQ">
                                         <connections>
                                             <action selector="HandleTestButton:" destination="BYZ-38-t0r" id="ncu-OA-Ytv"/>
@@ -53,22 +59,10 @@
                                             <action selector="HandlePauseButton:" destination="BYZ-38-t0r" id="bDZ-fC-FqK"/>
                                         </connections>
                                     </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="3Ze-Sk-kBy"/>
-                                    <barButtonItem title="Connect" id="KZU-WE-5me">
-                                        <connections>
-                                            <action selector="HandleConnectButton:" destination="BYZ-38-t0r" id="DKA-73-rdZ"/>
-                                        </connections>
-                                    </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="0eY-HS-2fW"/>
-                                    <barButtonItem systemItem="refresh" id="pSv-EC-Y0r">
-                                        <connections>
-                                            <action selector="HandleRefreshButton:" destination="BYZ-38-t0r" id="fCU-Se-taQ"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="Z4A-nq-cow"/>
                                     <barButtonItem title="Send" id="XO3-yg-mS2">
                                         <connections>
-                                            <action selector="HandleSendButton:" destination="BYZ-38-t0r" id="RLl-Sv-8fY"/>
+                                            <segue destination="ilx-zK-SJr" kind="show" identifier="SendToRemote" id="s6D-hH-sdM"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="rbO-fK-Ehj"/>
@@ -323,7 +317,6 @@
                         <outlet property="IdiotLightContainer" destination="y6a-GX-7oq" id="Kb2-nU-M7j"/>
                         <outlet property="LogTable" destination="RAZ-HR-0B9" id="W4p-cW-cIP"/>
                         <outlet property="StatusTable" destination="3tH-2M-Air" id="Kap-W9-53c"/>
-                        <segue destination="ilx-zK-SJr" kind="show" identifier="ToSendToRemote" id="DZB-PD-zu5"/>
                         <segue destination="DtW-tp-80w" kind="show" identifier="ToConnector" id="Rgz-R0-UdQ"/>
                         <segue destination="Qit-Fe-MK9" kind="show" identifier="ToLogItemViewer" id="Bh2-m1-EuO"/>
                     </connections>
@@ -332,13 +325,13 @@
             </objects>
             <point key="canvasLocation" x="131.25" y="137.6953125"/>
         </scene>
-        <!--SendToRemoteMain-->
+        <!--SendToRemote-->
         <scene sceneID="BzP-mU-E9z">
             <objects>
-                <viewControllerPlaceholder storyboardName="SendToRemote" referencedIdentifier="SendToRemoteMain" id="ilx-zK-SJr" sceneMemberID="viewController"/>
+                <viewControllerPlaceholder storyboardName="SendToRemote" id="ilx-zK-SJr" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eJR-kM-iGg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="641" y="138"/>
+            <point key="canvasLocation" x="677" y="67"/>
         </scene>
         <!--ManualConnect-->
         <scene sceneID="VJ8-LA-xZS">
@@ -355,6 +348,14 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ynm-IU-WUE" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="621" y="332"/>
+        </scene>
+        <!--ClientTestUI-->
+        <scene sceneID="X7F-Ab-QgX">
+            <objects>
+                <viewControllerPlaceholder storyboardName="ClientTestUI" id="mbt-94-etS" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="WyJ-Mn-cFe" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="587" y="422"/>
         </scene>
     </scenes>
 </document>
