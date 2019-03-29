@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		171A2DEF224DD54000B3D556 /* MultiPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DEE224DD54000B3D556 /* MultiPeer.swift */; };
+		171A2DF1224DDFED00B3D556 /* MultiPeerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */; };
 		1734ABE422487F80007059F3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABE322487F80007059F3 /* AppDelegate.swift */; };
 		1734ABE922487F80007059F3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1734ABE722487F80007059F3 /* Main.storyboard */; };
 		1734ABEB22487F81007059F3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1734ABEA22487F81007059F3 /* Assets.xcassets */; };
@@ -39,6 +41,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		171A2DEE224DD54000B3D556 /* MultiPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiPeer.swift; sourceTree = "<group>"; };
+		171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiPeerDelegate.swift; sourceTree = "<group>"; };
 		1734ABE022487F80007059F3 /* TDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1734ABE322487F80007059F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1734ABE822487F80007059F3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -83,6 +87,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		171A2DED224DD52600B3D556 /* Multi-Peer */ = {
+			isa = PBXGroup;
+			children = (
+				171A2DEE224DD54000B3D556 /* MultiPeer.swift */,
+				171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */,
+			);
+			path = "Multi-Peer";
+			sourceTree = "<group>";
+		};
 		1734ABD722487F80007059F3 = {
 			isa = PBXGroup;
 			children = (
@@ -112,6 +125,7 @@
 				1734ABFB22488CD9007059F3 /* StatusTableCell.swift */,
 				1734ABEC22487F81007059F3 /* LaunchScreen.storyboard */,
 				17EF4160224BAE440008EB83 /* Versioning.swift */,
+				171A2DED224DD52600B3D556 /* Multi-Peer */,
 				178348F0224C8B250074D7BA /* ManualConnect */,
 				17EF415D224B8FC20008EB83 /* LogDisplay */,
 				17EF4156224B64860008EB83 /* Communications */,
@@ -274,6 +288,7 @@
 				177FAB2B224A46CB00379A4C /* CommandObject.swift in Sources */,
 				1734ABF82248862A007059F3 /* LogItem.swift in Sources */,
 				17EF4155224B2FF10008EB83 /* ManualConnectProtocol.swift in Sources */,
+				171A2DF1224DDFED00B3D556 /* MultiPeerDelegate.swift in Sources */,
 				177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */,
 				177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */,
 				1734ABF6224883D3007059F3 /* MainController.swift in Sources */,
@@ -288,6 +303,7 @@
 				1734ABFA2248889C007059F3 /* IDTableCell.swift in Sources */,
 				177FAB24224A222400379A4C /* Comm.swift in Sources */,
 				177FAB32224A4A9A00379A4C /* Command_NOP.swift in Sources */,
+				171A2DEF224DD54000B3D556 /* MultiPeer.swift in Sources */,
 				17EF415F224B97AD0008EB83 /* CommStatic.swift in Sources */,
 				177FAB36224A58A400379A4C /* Command_AddToID.swift in Sources */,
 				177FAB38224A592100379A4C /* Command_DisableIdiotLight.swift in Sources */,
