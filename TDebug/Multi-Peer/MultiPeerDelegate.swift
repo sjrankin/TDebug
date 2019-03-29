@@ -7,9 +7,10 @@
 //
 
 import Foundation
+import MultipeerConnectivity
 
 protocol MultiPeerDelegate
 {
-    func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [String])
-    func ReceivedData(Manager: MultiPeerManager, RawData: String)
+    func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [MCPeerID], Changed: MCPeerID, NewState: MCSessionState)
+    func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String)
 }
