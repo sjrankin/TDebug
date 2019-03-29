@@ -18,7 +18,8 @@ class LogTableCell: UITableViewCell
         super.init(coder: aDecoder)
     }
     
-    var TitleLabel: UILabel!
+    var HostLabel: UILabel!
+    var TimeStampLabel: UILabel!
     var ValueLabel: UILabel!
     
     override init(style Style: UITableViewCell.CellStyle, reuseIdentifier ReuseIdentifier: String?)
@@ -26,10 +27,15 @@ class LogTableCell: UITableViewCell
         super.init(style: Style, reuseIdentifier: ReuseIdentifier)
         let TableWidth = self.contentView.bounds.width
         
-        TitleLabel = UILabel(frame: CGRect(x: 15, y: 10, width: TableWidth - 15, height: 20))
-        TitleLabel.font = UIFont(name: "Avenir", size: 16.0)
-        TitleLabel.textColor = UIColor.darkGray
-        self.contentView.addSubview(TitleLabel)
+        HostLabel = UILabel(frame: CGRect(x: 15, y: 10, width: 100, height: 20))
+        HostLabel.font = UIFont(name: "Avenir", size: 16.0)
+        HostLabel.textColor = UIColor.black
+        self.contentView.addSubview(HostLabel)
+        
+        TimeStampLabel = UILabel(frame: CGRect(x: 125, y: 10, width: TableWidth - 125, height: 20))
+        TimeStampLabel.font = UIFont(name: "Avenir", size: 16.0)
+        TimeStampLabel.textColor = UIColor.darkGray
+        self.contentView.addSubview(TimeStampLabel)
         
         ValueLabel = UILabel(frame: CGRect(x: 15, y: 30, width: TableWidth - 15, height: 45))
         ValueLabel.font = UIFont(name: "Avenir-Bold", size: 18.0)
@@ -45,8 +51,16 @@ class LogTableCell: UITableViewCell
     public func SetData(Item: LogItem)
     {
         TheItem = Item
-        TitleLabel.text = TheItem.Title
+        TimeStampLabel.text = TheItem.Title
         ValueLabel.text = TheItem.Message
+        if let HostName = TheItem.HostName
+        {
+            HostLabel.text = HostName
+        }
+        else
+        {
+            HostLabel.text = "{unknown}"
+        }
         if let BGColor = TheItem.BGColor
         {
             self.backgroundColor = BGColor
