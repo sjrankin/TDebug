@@ -37,6 +37,20 @@ class LogItem
     /// Initializer.
     ///
     /// - Parameters:
+    ///   - TimeStamp: Timestamp value.
+    ///   - Host: Name of the host where the message originated.
+    ///   - Text: Message value.
+    init(TimeStamp: String, Host: String, Text: String)
+    {
+        _ID = UUID()
+        Title = TimeStamp
+        Message = Text
+        HostName = Host
+    }
+    
+    /// Initializer.
+    ///
+    /// - Parameters:
     ///   - ItemID: ID of the log item.
     ///   - TimeStamp: Timestamp value.
     ///   - Text: Message value.
@@ -86,6 +100,19 @@ class LogItem
         set
         {
             _Message = newValue
+        }
+    }
+    
+    private var _HostName: String? = nil
+    public var HostName: String?
+    {
+        get
+        {
+            return _HostName
+        }
+        set
+        {
+            _HostName = newValue
         }
     }
     
