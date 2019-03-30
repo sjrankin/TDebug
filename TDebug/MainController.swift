@@ -174,7 +174,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let (MessageType, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
         if (MessageType == .EchoMessage)
         {
-            DelaySomething(2.0, Closure: {self.MPMgr.Send(To: Peer, Message: FinalMessage)})
+            DelaySomething(2.0, Closure: {self.MPMgr.Broadcast(Message: FinalMessage, To: Peer)})
             return
         }
         if (MessageType == .Heartbeat)
@@ -521,19 +521,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         switch segue.identifier
         {
-            /*
-             case "ToConnector":
-             if let Dest = segue.destination as? ManualConnectCode
-             {
-             Dest.ParentDelegate = self
-             }
-             else
-             {
-             print("Error running connector view.")
-             return
-             }
-             */
-            
         case "ToLogItemViewer":
             if let Dest = segue.destination as? LogItemViewerCode
             {
@@ -542,6 +529,12 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
         case "SendToRemote":
             if let Dest = segue.destination as? SendToRemoteCode
+            {
+                Dest.Main = self
+            }
+            
+        case "ToClientTest":
+            if let Dest = segue.destination as? ClientTestUICode
             {
                 Dest.Main = self
             }
@@ -556,7 +549,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBAction func HandleTestButton(_ sender: Any)
     {
         #if true
-        MPMgr.Send(Message: "Test \(TestCount)")
+        MPMgr.Broadcast(Message: "Test \(TestCount)")
         TestCount = TestCount + 1
         #else
         if CurrentHost.isEmpty
@@ -565,7 +558,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
             return
         }
         TComm.ConnectToRemote(CurrentServer!)
-        TComm.Send(Message: "Test \(TestCount)")
+        TComm.Broadcast(Message: "Test \(TestCount)")
         TestCount = TestCount + 1
         #endif
     }
