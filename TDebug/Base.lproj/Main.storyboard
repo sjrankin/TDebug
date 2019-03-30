@@ -38,7 +38,7 @@
                                     <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="8Vy-cA-ytw"/>
                                     <barButtonItem title="Client Test" id="h8J-wD-UiA">
                                         <connections>
-                                            <segue destination="mbt-94-etS" kind="show" id="aYp-Pd-asq"/>
+                                            <segue destination="mbt-94-etS" kind="show" identifier="ToClientTest" id="aYp-Pd-asq"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="vMe-a4-lMa"/>
