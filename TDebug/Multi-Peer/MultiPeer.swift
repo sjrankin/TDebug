@@ -57,15 +57,29 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
-    func Send(Message: String)
+    func Broadcast(Message: String)
     {
         if Session.connectedPeers.count > 0
         {
             do
             {
                 let EncodedMessage = MessageHelper.MakeMessage(Message, GetDeviceName())
-                print("Sending \(EncodedMessage)")
                 try Session.send(EncodedMessage.data(using: String.Encoding.utf8)!, toPeers: Session.connectedPeers, with: .reliable)
+            }
+            catch
+            {
+                print("Error broadcasting message: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func SendPreformatted(Message: String)
+    {
+        if Session.connectedPeers.count > 0
+        {
+            do
+            {
+                try Session.send(Message.data(using: String.Encoding.utf8)!, toPeers: Session.connectedPeers, with: .reliable)
             }
             catch
             {
@@ -74,12 +88,24 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
-    func Send(To: MCPeerID, Message: String)
+    func Broadcast(Message: String, To: MCPeerID)
     {
         do
         {
             let EncodedMessage = MessageHelper.MakeMessage(Message, GetDeviceName())
             try Session.send(EncodedMessage.data(using: String.Encoding.utf8)!, toPeers: [To], with: .reliable)
+        }
+        catch
+        {
+            print("Error broadcasting message to \(To.displayName): \(error.localizedDescription)")
+        }
+    }
+    
+    func SendPreformatted(Message: String, To: MCPeerID)
+    {
+        do
+        {
+            try Session.send(Message.data(using: String.Encoding.utf8)!, toPeers: [To], with: .reliable)
         }
         catch
         {
