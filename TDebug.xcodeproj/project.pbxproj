@@ -35,6 +35,7 @@
 		177FAB36224A58A400379A4C /* Command_AddToID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB35224A58A400379A4C /* Command_AddToID.swift */; };
 		177FAB38224A592100379A4C /* Command_DisableIdiotLight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB37224A592100379A4C /* Command_DisableIdiotLight.swift */; };
 		177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */; };
+		178C04E6224F396E00D724FE /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178C04E5224F396E00D724FE /* UIColorExtensions.swift */; };
 		17EF4151224B2D890008EB83 /* ManualConnect.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17EF4150224B2D890008EB83 /* ManualConnect.storyboard */; };
 		17EF4153224B2E490008EB83 /* ManualConnectCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF4152224B2E490008EB83 /* ManualConnectCode.swift */; };
 		17EF4155224B2FF10008EB83 /* ManualConnectProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF4154224B2FF10008EB83 /* ManualConnectProtocol.swift */; };
@@ -76,6 +77,7 @@
 		177FAB35224A58A400379A4C /* Command_AddToID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_AddToID.swift; sourceTree = "<group>"; };
 		177FAB37224A592100379A4C /* Command_DisableIdiotLight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_DisableIdiotLight.swift; sourceTree = "<group>"; };
 		177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_SetIdiotLight.swift; sourceTree = "<group>"; };
+		178C04E5224F396E00D724FE /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
 		17EF4150224B2D890008EB83 /* ManualConnect.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ManualConnect.storyboard; sourceTree = "<group>"; };
 		17EF4152224B2E490008EB83 /* ManualConnectCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualConnectCode.swift; sourceTree = "<group>"; };
 		17EF4154224B2FF10008EB83 /* ManualConnectProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualConnectProtocol.swift; sourceTree = "<group>"; };
@@ -144,6 +146,7 @@
 		1734ABE222487F80007059F3 /* TDebug */ = {
 			isa = PBXGroup;
 			children = (
+				178C04E4224F395900D724FE /* Extensions */,
 				1734ABEA22487F81007059F3 /* Assets.xcassets */,
 				1734ABEF22487F81007059F3 /* Info.plist */,
 				1734ABE322487F80007059F3 /* AppDelegate.swift */,
@@ -197,6 +200,14 @@
 				17EF4152224B2E490008EB83 /* ManualConnectCode.swift */,
 			);
 			path = ManualConnect;
+			sourceTree = "<group>";
+		};
+		178C04E4224F395900D724FE /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				178C04E5224F396E00D724FE /* UIColorExtensions.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		17EF4156224B64860008EB83 /* Communications */ = {
@@ -326,6 +337,7 @@
 				177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */,
 				1734ABF6224883D3007059F3 /* MainController.swift in Sources */,
 				177FAB34224A4B2700379A4C /* CommandObjectProtocol.swift in Sources */,
+				178C04E6224F396E00D724FE /* UIColorExtensions.swift in Sources */,
 				1734ABFC22488CD9007059F3 /* StatusTableCell.swift in Sources */,
 				171A2DF8224E091400B3D556 /* SendToRemoteCode.swift in Sources */,
 				17EF4153224B2E490008EB83 /* ManualConnectCode.swift in Sources */,
