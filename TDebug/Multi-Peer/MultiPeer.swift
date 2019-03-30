@@ -40,7 +40,9 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
     
     deinit
     {
+        print("Shutting down advertising peer.")
         ServiceAdvertiser.stopAdvertisingPeer()
+                print("Shutting down peer browser.")
         ServiceBrower.stopBrowsingForPeers()
     }
     
