@@ -77,22 +77,43 @@ class MessageHelper
             return nil
         }
         var FinalPayload: String? = nil
-        if String(Parts[1]).count > 0
+        if Parts.count > 1
         {
-            if let (Key2, Value2) = DecodeKVP(String(Parts[1]), Delimiter: "=")
+            if String(Parts[1]).count > 0
             {
-                if (Key2 == "Payload")
+                if let (Key2, Value2) = DecodeKVP(String(Parts[1]), Delimiter: "=")
                 {
-                    FinalPayload = Value2
-                }
-                else
-                {
-                    print("Unexpected key found: \(Key2)")
-                    return nil
+                    if (Key2 == "Payload")
+                    {
+                        FinalPayload = Value2
+                    }
+                    else
+                    {
+                        print("Unexpected key found: \(Key2)")
+                        return nil
+                    }
                 }
             }
         }
         return (NextExpeced, FinalPayload)
+    }
+    
+    public static func DecodeIdiotLightCommand(_ Raw: String) -> (MessageTypes, String, String, String)
+    {
+        if Raw.isEmpty
+        {
+            return (MessageTypes.Unknown, "", "", "")
+        }
+        let Delimiter = String(Raw.first!)
+        var Next = Raw
+        Next.removeFirst()
+        let Parts = Next.split(separator: String.Element(Delimiter), maxSplits: 4, omittingEmptySubsequences: false)
+        if Parts.count != 4
+        {
+            //Assume the last item in the parts list is the message and return it as an unknown type.
+            return (MessageTypes.Unknown, "", "", String(Parts[Parts.count - 1]))
+        }
+        return (MessageTypeFromID(String(Parts[0])), String(Parts[1]), String(Parts[2]), String(Parts[3]))
     }
     
     public static func GetMessageType(_ Raw: String) -> MessageTypes
@@ -210,6 +231,48 @@ class MessageHelper
         return MakeMessage(WithType: .Heartbeat, Message, HostName)
     }
     
+    public static func MakeIdiotLightMessage(Address: String, State: UIFeatureStates) -> String
+{
+    let Command = MessageTypeIndicators[.ControlIdiotLight]!
+    let Action = "Enable=" + [UIFeatureStates.Disabled: "No", UIFeatureStates.Enabled: "Yes"][State]!
+    let Delimiter = GetUnusedDelimiter(From: [Command, Action])
+    let Final = Delimiter + Command + Delimiter + Action
+    return Final
+    }
+    
+    public static func MakeIdiotLightMessage(Address: String, Text: String) -> String
+    {
+        let Command = MessageTypeIndicators[.ControlIdiotLight]!
+        let Action = "Text=" + Text
+        let Delimiter = GetUnusedDelimiter(From: [Command, Action])
+        let Final = Delimiter + Command + Delimiter + Action
+        return Final
+    }
+    
+    public static func MakeIdiotLightMessage(Address: String, FGColor: UIColor? = nil, BGColor: UIColor? = nil) -> String
+    {
+        if FGColor == nil && BGColor == nil
+        {
+            return ""
+        }
+        let Command = MessageTypeIndicators[.ControlIdiotLight]!
+        var FG = "nil"
+        if let FGC = FGColor
+        {
+            FG = FGC.AsHexString()
+        }
+        var BG = "nil"
+        if let BGC = BGColor
+        {
+            BG = BGC.AsHexString()
+        }
+        let Action1 = "FGColor=" + FG
+        let Action2 = "BGColor=" + BG
+        let Delimiter = GetUnusedDelimiter(From: [Command, Action1, Action2])
+        let Final = Delimiter + Command + Delimiter + Action1 + Delimiter + Action2
+        return Final
+    }
+    
     private static let MessageTypeIndicators: [MessageTypes: String] =
         [
             MessageTypes.TextMessage: "a8d8c35e-f638-47fe-8819-bd04d59c6989",
@@ -218,6 +281,8 @@ class MessageHelper
             MessageTypes.EchoMessage: "9a904bd0-117b-4548-b31f-da2b4c3807dd",
             MessageTypes.Acknowledge: "73783e04-cad4-42a4-a3b3-449efcabf592",
             MessageTypes.Heartbeat: "5d8a38fd-878a-458f-aa80-62d810e520c1",
+            MessageTypes.StatusValue: "280b67c2-c7bc-4fcb-b287-41d2539f4680",
+            MessageTypes.IDValue: "4c2805b8-d5ad-4c68-a5f8-1f554a90671a",
             MessageTypes.Unknown: "dfc5b2d5-521b-46a8-b459-a4947089312c",
     ]
 }
@@ -230,5 +295,13 @@ enum MessageTypes: Int
     case EchoMessage = 3
     case Acknowledge = 4
     case Heartbeat = 5
+    case StatusValue = 6
+    case IDValue = 7
     case Unknown = 10000
+}
+
+enum UIFeatureStates: Int
+{
+    case Disabled = 0
+    case Enabled = 1
 }
