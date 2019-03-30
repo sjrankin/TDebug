@@ -42,6 +42,12 @@ class ClientTestUICode: UIViewController, UITableViewDelegate, UITableViewDataSo
         ServerMessageTable.reloadData()
     }
     
+    override func viewWillDisappear(_ animated: Bool)
+    {
+        super.viewWillDisappear(animated)
+        MPMgr = nil
+    }
+    
     func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [MCPeerID], Changed: MCPeerID, NewState: MCSessionState)
     {
         
