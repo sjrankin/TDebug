@@ -66,6 +66,12 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="rbO-fK-Ehj"/>
+                                    <barButtonItem systemItem="bookmarks" id="mdH-Zj-Z3j">
+                                        <connections>
+                                            <action selector="HandleDumpPeers:" destination="BYZ-38-t0r" id="04f-Kk-8OU"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="RrP-PN-Qqw"/>
                                     <barButtonItem systemItem="action" id="Gni-u7-sf9">
                                         <connections>
                                             <action selector="HandleActionButton:" destination="BYZ-38-t0r" id="a2Y-I3-NFz"/>
