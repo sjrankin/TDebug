@@ -572,6 +572,44 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         present(Alert, animated: true)
     }
     
+    func ConvertToNetworkName(_ Raw: String) -> String
+    {
+        return Raw.replacingOccurrences(of: " ", with: "-")
+    }
+    
+    @IBAction func HandleDumpPeers(_ sender: Any)
+    {
+        let ServerList = MPMgr.GetPeerList()
+        let Button = sender as? UIBarButtonItem
+        
+        let ThisDevice = ConvertToNetworkName(GetDeviceName())
+        let Alert = UIAlertController(title: "Server List",
+                                      message: "Current list of peers that are advertising.",
+                                      preferredStyle: UIAlertController.Style.alert)
+        for Index in 0 ..< ServerList.count
+        {
+            var IsSelf = false
+            //print("\(ThisDevice): \(ConvertToNetworkName(ServerList[Index].displayName))")
+            if ConvertToNetworkName(ServerList[Index].displayName) == ThisDevice
+            {
+                IsSelf = true
+            }
+            let Title = "\(Index + 1). " + ServerList[Index].displayName
+            let AAction = UIAlertAction(title: Title, style: UIAlertAction.Style.default, handler: nil)
+            Alert.addAction(AAction)
+            if IsSelf
+            {
+                Alert.actions[Index].isEnabled = false
+                Alert.actions[Index].setValue(UIColor.darkGray, forKey: "titleTextColor")
+            }
+        }
+        Alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
+        
+        let Presenter = Alert.popoverPresentationController
+        Presenter?.barButtonItem = Button
+        present(Alert, animated: true, completion: nil)
+    }
+    
     var IDList = [(String, String)]()
     var StatusList = [(String, String)]()
     var LogList = [LogItem]()
