@@ -156,4 +156,36 @@ extension UIColor
         case RGBA
         case ABGR
     }
+    
+    public static func MakeRandomColor(_ ColorType: RandomColorTypes = .AnyColor) -> UIColor
+    {
+        var RRed: Double = 0.0
+        var RGreen: Double = 0.0
+        var RBlue: Double = 0.0
+        switch ColorType
+        {
+        case .AnyColor:
+            RRed = Double.random(in: 0.0 ... 1.0)
+            RGreen = Double.random(in: 0.0 ... 1.0)
+            RBlue = Double.random(in: 0.0 ... 1.0)
+            
+        case .Dark:
+            RRed = Double.random(in: 0.0 ... 0.3)
+            RGreen = Double.random(in: 0.0 ... 0.3)
+            RBlue = Double.random(in: 0.0 ... 0.3)
+            
+        case .Light:
+            RRed = Double.random(in: 0.7 ... 1.0)
+            RGreen = Double.random(in: 0.7 ... 1.0)
+            RBlue = Double.random(in: 0.7 ... 1.0)
+        }
+        return UIColor(red: CGFloat(RRed), green: CGFloat(RGreen), blue: CGFloat(RBlue), alpha: 1.0)
+    }
+    
+    public enum RandomColorTypes
+    {
+        case AnyColor
+        case Dark
+        case Light
+    }
 }
