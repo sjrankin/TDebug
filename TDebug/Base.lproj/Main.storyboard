@@ -79,16 +79,11 @@
                                     </barButtonItem>
                                 </items>
                             </toolbar>
-                            <tableView clipsSubviews="YES" tag="200" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="3tH-2M-Air">
-                                <rect key="frame" x="20" y="269" width="320" height="240"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <viewLayoutGuide key="safeArea" id="en4-kx-roh"/>
-                            </tableView>
                             <tableView clipsSubviews="YES" tag="100" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="ROp-Ia-FGR">
-                                <rect key="frame" x="20" y="46" width="320" height="215"/>
+                                <rect key="frame" x="20" y="46" width="320" height="463"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="215" id="KYs-AS-C2d"/>
+                                    <constraint firstAttribute="height" constant="463" id="KYs-AS-C2d"/>
                                 </constraints>
                                 <viewLayoutGuide key="safeArea" id="s4K-BK-USG"/>
                             </tableView>
@@ -280,13 +275,9 @@
                         <constraints>
                             <constraint firstItem="lST-Y1-iQn" firstAttribute="top" secondItem="RAZ-HR-0B9" secondAttribute="bottom" constant="14" id="0aU-l8-ARf"/>
                             <constraint firstItem="y6a-GX-7oq" firstAttribute="top" secondItem="ROp-Ia-FGR" secondAttribute="top" id="8B9-2q-KEz"/>
-                            <constraint firstItem="ROp-Ia-FGR" firstAttribute="leading" secondItem="3tH-2M-Air" secondAttribute="leading" id="Ddr-ho-ZO2"/>
                             <constraint firstAttribute="bottom" secondItem="y6a-GX-7oq" secondAttribute="bottom" constant="515" id="GcL-NC-cKL"/>
                             <constraint firstItem="y6a-GX-7oq" firstAttribute="leading" secondItem="ROp-Ia-FGR" secondAttribute="trailing" constant="8" symbolic="YES" id="H5z-3x-fQ4"/>
-                            <constraint firstItem="y6a-GX-7oq" firstAttribute="leading" secondItem="3tH-2M-Air" secondAttribute="trailing" constant="8" symbolic="YES" id="ITb-ED-iKr"/>
-                            <constraint firstItem="3tH-2M-Air" firstAttribute="top" secondItem="ROp-Ia-FGR" secondAttribute="bottom" constant="8" symbolic="YES" id="JgO-w5-7R6"/>
                             <constraint firstItem="lST-Y1-iQn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="OfO-Aj-nLA"/>
-                            <constraint firstItem="y6a-GX-7oq" firstAttribute="bottom" secondItem="3tH-2M-Air" secondAttribute="bottom" id="VQp-DR-HkV"/>
                             <constraint firstItem="y6a-GX-7oq" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="bIK-3O-UjG"/>
                             <constraint firstItem="ROp-Ia-FGR" firstAttribute="leading" secondItem="RAZ-HR-0B9" secondAttribute="leading" id="dfv-kJ-N5w"/>
                             <constraint firstItem="y6a-GX-7oq" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="348" id="dzG-jF-0Fl"/>
@@ -294,7 +285,6 @@
                             <constraint firstItem="RAZ-HR-0B9" firstAttribute="top" secondItem="y6a-GX-7oq" secondAttribute="bottom" constant="8" symbolic="YES" id="lHj-LO-wOD"/>
                             <constraint firstItem="y6a-GX-7oq" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="26" id="oTo-Fl-iVt"/>
                             <constraint firstItem="ROp-Ia-FGR" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="sTc-Rt-tkq"/>
-                            <constraint firstItem="y6a-GX-7oq" firstAttribute="leading" secondItem="3tH-2M-Air" secondAttribute="trailing" constant="8" id="uve-q2-n5X"/>
                             <constraint firstItem="lST-Y1-iQn" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="vTg-LA-CgR"/>
                             <constraint firstItem="RAZ-HR-0B9" firstAttribute="centerX" secondItem="lST-Y1-iQn" secondAttribute="centerX" id="xdm-ys-Q76"/>
                         </constraints>
@@ -319,10 +309,9 @@
                         <outlet property="C2Label" destination="kyl-rN-DFd" id="3BR-8A-xL1"/>
                         <outlet property="C3" destination="MkH-wj-LIb" id="dfx-mP-yUM"/>
                         <outlet property="C3Label" destination="yUu-DV-2Rs" id="yLm-h1-sq9"/>
-                        <outlet property="IDTable" destination="ROp-Ia-FGR" id="d5B-ec-XWF"/>
                         <outlet property="IdiotLightContainer" destination="y6a-GX-7oq" id="Kb2-nU-M7j"/>
+                        <outlet property="KVPTable" destination="ROp-Ia-FGR" id="d5B-ec-XWF"/>
                         <outlet property="LogTable" destination="RAZ-HR-0B9" id="W4p-cW-cIP"/>
-                        <outlet property="StatusTable" destination="3tH-2M-Air" id="Kap-W9-53c"/>
                         <segue destination="DtW-tp-80w" kind="show" identifier="ToConnector" id="Rgz-R0-UdQ"/>
                         <segue destination="Qit-Fe-MK9" kind="show" identifier="ToLogItemViewer" id="Bh2-m1-EuO"/>
                     </connections>
