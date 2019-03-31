@@ -10,7 +10,11 @@ import Foundation
 import MultipeerConnectivity
 
 /// Class that manages multi-peer communications.
-/// [Multipeer-Connectivity](https://www.ralfebert.de/ios/tutorials/multipeer-connectivity/)
+/// - Note:
+///     - This class manages communications on an application-by-application basis, which means having multiple copies
+///       of the class instantiated at one time does nothing more than confuse those applications trying to communicate
+///       with the target app.
+///     - [Multipeer-Connectivity](https://www.ralfebert.de/ios/tutorials/multipeer-connectivity/)
 class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate
 {
     private let TDebugServiceType = "debug-sink"
@@ -26,6 +30,7 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
             return Session
     }()
     
+    /// Initializer. Immediately starts advertising this instance as well as browse for nearby services of the same service type.
     override init()
     {
         ServiceAdvertiser = MCNearbyServiceAdvertiser(peer: PeerID, discoveryInfo: nil, serviceType: TDebugServiceType)
@@ -35,18 +40,25 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         ServiceAdvertiser.startAdvertisingPeer()
         ServiceBrower.delegate = self
         ServiceBrower.startBrowsingForPeers()
-        print("Started multi-peer advertising (ID: \(PeerID))")
     }
     
+    /// Deinitializer. Shutdown advertising and browsing.
     deinit
+    {
+        Shutdown()
+    }
+    
+    func Shutdown()
     {
         print("Shutting down advertising peer.")
         ServiceAdvertiser.stopAdvertisingPeer()
-                print("Shutting down peer browser.")
+        
+        print("Shutting down peer browser.")
         ServiceBrower.stopBrowsingForPeers()
     }
     
     private var _IsDebugHost: Bool = false
+    /// Get or set the debug host flag.
     public var IsDebugHost: Bool
     {
         get
@@ -59,6 +71,10 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
+    /// Broadcast the passed message (internally wrapped into a properly formatted command) to all peers. This is a fast way to
+    /// broadcast a string to all peers.
+    ///
+    /// - Parameter Message: The message to broadcast.
     func Broadcast(Message: String)
     {
         if Session.connectedPeers.count > 0
@@ -75,7 +91,10 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
-    func SendPreformatted(Message: String)
+    /// Broadcast the pre-formatted message (which may be any message formatted with the `MessageHelper` class) to all peers.
+    ///
+    /// - Parameter Message: The properly formatted (use `MessageHelper` to format your command messages) message to send to all peers.
+    func BroadcastPreformatted(Message: String)
     {
         if Session.connectedPeers.count > 0
         {
@@ -90,7 +109,13 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
-    func Broadcast(Message: String, To: MCPeerID)
+    /// Send a string message to the specified peer. The internally wrapped message does not contain any commands other than
+    /// "here's a string".
+    ///
+    /// - Parameters:
+    ///   - Message: The message to send.
+    ///   - To: The peer to send the message to.
+    func Send(Message: String, To: MCPeerID)
     {
         do
         {
@@ -103,6 +128,12 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
+    /// Send a pre-formatted (use `MessageHelper` to generate such messages) message (which may be any command available through
+    /// `MessageHelper` to the specified peer.
+    ///
+    /// - Parameters:
+    ///   - Message: The properly formatted message to send to the specified peer.
+    ///   - To: The peer to send the message to.
     func SendPreformatted(Message: String, To: MCPeerID)
     {
         do
@@ -115,38 +146,75 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
+    /// Return the list of connected peers.
+    ///
+    /// - Returns: List of connected peers. May change over time so call periodically.
     func GetPeerList() -> [MCPeerID]
     {
         return Session.connectedPeers
     }
     
+    /// Handles the advertising service did not start event.
+    ///
+    /// - Parameters:
+    ///   - advertiser: The advertising server.
+    ///   - error: The related error.
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: Error)
     {
         print("Error starting advertising service: \(error.localizedDescription)")
     }
     
+    /// Handle the received invitation event from a peer.
+    ///
+    /// - Parameters:
+    ///   - advertiser: The advertising server.
+    ///   - peerID: The ID of the peer accepting the invitation.
+    ///   - context: Not used.
+    ///   - invitationHandler: Handles invitations.
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void)
     {
         print("Received invitation from \(peerID)")
         invitationHandler(true, Session)
     }
     
+    /// Handles the nearby browser did not start error event.
+    ///
+    /// - Parameters:
+    ///   - browser: The nearby peer browser service.
+    ///   - error: The related error.
     func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: Error)
     {
         print("Error starting service browser: \(error.localizedDescription)")
     }
     
+    /// Handles the found-a-peer event.
+    ///
+    /// - Parameters:
+    ///   - browser: The nearby service browser.
+    ///   - peerID: The ID of the peer that was found.
+    ///   - info: Not used.
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?)
     {
         print("Found peer \(peerID) - inviting to session.")
         browser.invitePeer(peerID, to: Session, withContext: nil, timeout: 10)
     }
     
+    /// Handle the lost a peer (probably because the app was shut down on the remote side) event.
+    ///
+    /// - Parameters:
+    ///   - browser: The nearby peer browser service.
+    ///   - peerID: The ID of the peer that was lost.
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID)
     {
         print("Lost peer \(peerID)")
     }
     
+    /// Handle the some peer changed state event.
+    ///
+    /// - Parameters:
+    ///   - session: The session for the peer.
+    ///   - peerID: The ID of the peer.
+    ///   - state: The peer's new state.
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState)
     {
         print("Peer \(peerID) changed state: \(state.rawValue)")
@@ -154,27 +222,61 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
                                          Changed: peerID, NewState: state)
     }
     
+    /// Handle the received data from a session event.
+    ///
+    /// - Parameters:
+    ///   - session: The session for the peer.
+    ///   - data: The data sent by the peer.
+    ///   - peerID: The ID of the peer that sent the data.
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID)
     {
         let Message = String(data: data, encoding: .utf8)
         Delegate?.ReceivedData(Manager: self, Peer: peerID, RawData: Message!)
     }
     
+    /// Handle the received input stream from a session event.
+    ///
+    /// - Parameters:
+    ///   - session: The session for the peer.
+    ///   - stream: The input stream from the peer.
+    ///   - streamName: The name of the stream.
+    ///   - peerID: The ID of the peer that started the input stream.
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID)
     {
         print("Received stream data from \(peerID)")
     }
     
+    /// Handle the started receiving a resource with a name event.
+    ///
+    /// - Parameters:
+    ///   - session: The session for the peer.
+    ///   - resourceName: The name of the resource.
+    ///   - peerID: The ID of the peer that sent the resource.
+    ///   - progress: A progress object.
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress)
     {
         print("Started receiving resource from \(peerID)")
     }
     
+    /// Handle the ended receiving a resource with a name event.
+    ///
+    /// - Parameters:
+    ///   - session: The session for the peer.
+    ///   - resourceName: The name of the resource.
+    ///   - peerID: The ID of the peer that sent the resource.
+    ///   - localURL: Local URL.
+    ///   - error: Error information if relevant.
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?)
     {
         print("Finished receiving resource from \(peerID)")
     }
     
+    /// Returns the name of the current device. The name is the network name given to the device by the user.
+    ///
+    /// - Note: The name is cached to increase speed on the assumption the user won't rename the device while using
+    ///         the app that is running this code.
+    ///
+    /// - Returns: Name of the device.
     func GetDeviceName() -> String
     {
         if let TheName = TheDeviceName
@@ -193,5 +295,6 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         return TheDeviceName!
     }
     
+    /// Cached device name.
     var TheDeviceName: String? = nil
 }
