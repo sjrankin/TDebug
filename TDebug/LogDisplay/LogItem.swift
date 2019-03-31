@@ -15,11 +15,16 @@ class LogItem
     /// Initializer. The ID and timestamp are generated automatically.
     ///
     /// - Parameter Text: The text of the item.
-    init(Text: String)
+    init(Text: String, ShowInitialAnimation: Bool = true, FinalBG: UIColor = UIColor.white)
     {
         _ID = UUID()
         Title = Comm.MakeTimeStamp(FromDate: Date())
         Message = Text
+        DoAnimateBGColor = ShowInitialAnimation
+        if ShowInitialAnimation
+        {
+            SetForAutoAnimation(FinalBG)
+        }
     }
     
     /// Initializer.
@@ -27,11 +32,16 @@ class LogItem
     /// - Parameters:
     ///   - TimeStamp: Timestamp value.
     ///   - Text: Message value.
-    init(TimeStamp: String, Text: String)
+    init(TimeStamp: String, Text: String, ShowInitialAnimation: Bool = true, FinalBG: UIColor = UIColor.white)
     {
         _ID = UUID()
         Title = TimeStamp
         Message = Text
+        DoAnimateBGColor = ShowInitialAnimation
+        if ShowInitialAnimation
+        {
+            SetForAutoAnimation(FinalBG)
+        }
     }
     
     /// Initializer.
@@ -40,12 +50,17 @@ class LogItem
     ///   - TimeStamp: Timestamp value.
     ///   - Host: Name of the host where the message originated.
     ///   - Text: Message value.
-    init(TimeStamp: String, Host: String, Text: String)
+    init(TimeStamp: String, Host: String, Text: String, ShowInitialAnimation: Bool = true, FinalBG: UIColor = UIColor.white)
     {
         _ID = UUID()
         Title = TimeStamp
         Message = Text
         HostName = Host
+        DoAnimateBGColor = ShowInitialAnimation
+        if ShowInitialAnimation
+        {
+            SetForAutoAnimation(FinalBG)
+        }
     }
     
     /// Initializer.
@@ -54,11 +69,23 @@ class LogItem
     ///   - ItemID: ID of the log item.
     ///   - TimeStamp: Timestamp value.
     ///   - Text: Message value.
-    init(ItemID: UUID, TimeStamp: String, Text: String)
+    init(ItemID: UUID, TimeStamp: String, Text: String, ShowInitialAnimation: Bool = true, FinalBG: UIColor = UIColor.white)
     {
         _ID = ItemID
         Title = TimeStamp
         Message = Text
+        if ShowInitialAnimation
+        {
+            SetForAutoAnimation(FinalBG)
+        }
+    }
+    
+    func SetForAutoAnimation(_ FinalColor: UIColor)
+    {
+        BGColor = UIColor(named: "Tomato")
+        BGAnimateTargetColor = FinalColor
+        DoAnimateBGColor = true
+        BGAnimateColorDuration = 2.0
     }
     
     private var _ID: UUID? = nil
@@ -104,6 +131,7 @@ class LogItem
     }
     
     private var _HostName: String? = nil
+    /// Get or set the host name to display.
     public var HostName: String?
     {
         get
@@ -145,6 +173,8 @@ class LogItem
     }
     
     private var _DoAnimateBGColor: Bool = false
+    /// Determines if the background color animates when initially displaying the item. Set to true to have the background color
+    /// animate, and false to not perform animation.
     public var DoAnimateBGColor: Bool
     {
         get
@@ -158,6 +188,8 @@ class LogItem
     }
     
     private var _BGAnimateColorDuration: Double = 2.0
+    /// Duration of the background animation in seconds. Performed only when the log item is first displayed. Ignored if `DoAnimatedBGColor`
+    /// is false.
     public var BGAnimateColorDuration: Double
     {
         get
@@ -171,6 +203,7 @@ class LogItem
     }
     
     private var _BGAnimateTargetColor: UIColor = UIColor.white
+    /// The final background color for the log item when animating the background color.
     public var BGAnimateTargetColor: UIColor
     {
         get
@@ -184,6 +217,7 @@ class LogItem
     }
     
     private var _HasAnimated: Bool = false
+    /// Used by the log table view cell to determine whether the item has animated or not. **Do not set.**
     public var HasAnimated: Bool
     {
         get
