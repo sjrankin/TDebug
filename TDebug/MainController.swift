@@ -15,8 +15,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
 {
     var HostNames: [String]? = nil
     
-    let IDTableTag = 100
-    let StatusTableTag = 200
+    let KVPTableTag = 100
     let LogTableTag = 300
     var TComm: Comm!
     var MPMgr: MultiPeerManager!
@@ -29,13 +28,9 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         MPMgr = MultiPeerManager()
         MPMgr.Delegate = self
         
-        IDTable.delegate = self
-        IDTable.dataSource = self
-        IDTable.reloadData()
-        
-        StatusTable.delegate = self
-        StatusTable.dataSource = self
-        StatusTable.reloadData()
+        KVPTable.delegate = self
+        KVPTable.dataSource = self
+        KVPTable.reloadData()
         
         LogTable.delegate = self
         LogTable.dataSource = self
@@ -46,14 +41,14 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         IdiotLightContainer.layer.borderColor = UIColor.darkGray.cgColor
         LoadIdiotLights()
         
-        AddIDData("Program", Versioning.ApplicationName)
-        AddIDData("Version", Versioning.MakeVersionString(IncludeVersionSuffix: true, IncludeVersionPrefix: false))
-        AddIDData("Build", "\(Versioning.Build)")
-        AddIDData("This Host", GetDeviceName())
+        AddKVPData("Program", Versioning.ApplicationName)
+        AddKVPData("Version", Versioning.MakeVersionString(IncludeVersionSuffix: true, IncludeVersionPrefix: false))
+        AddKVPData("Build", "\(Versioning.Build)")
+        AddKVPData("This Host", GetDeviceName())
         let SomeItem = LogItem(ItemID: UUID(),
                                TimeStamp: Comm.MakeTimeStamp(FromDate: Date()),
                                Text: Versioning.MakeVersionBlock() + "\n" + "Running on \(GetDeviceName())")
-        SomeItem.HostName = "local"
+        SomeItem.HostName = "TDebug"
         SomeItem.BGColor = UIColor(named: "Lavender")
         LogList.append(SomeItem)
         
@@ -65,10 +60,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         TComm.SearchForServices()
         #endif
         
-        //Show inital values in the UI.
-        AddStatusData("Status", "Waiting for connection")
-        AddStatusData("Type", Comm.kTDebugBonjourType)
-        //AddStatusData("Port", "\(TComm.Port)")
         SetIdiotLight("A", 1, "Not Connected", UIColor.white, UIColor(red: 0.5, green: 0.0, blue: 0.0, alpha: 1.0))
         EnableIdiotLight("A", 2, false)
         EnableIdiotLight("A", 3, false)
@@ -89,6 +80,20 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
                                                name: UIApplication.willEnterForegroundNotification,
                                                object: nil)
         #endif
+    }
+    
+    override func viewDidLayoutSubviews()
+    {
+        super.viewDidLayoutSubviews()
+        IdiotLights["A1"] = (A1, A1Label)
+        IdiotLights["A2"] = (A2, A2Label)
+        IdiotLights["A3"] = (A3, A3Label)
+        IdiotLights["B1"] = (B1, B1Label)
+        IdiotLights["B2"] = (B2, B2Label)
+        IdiotLights["B3"] = (B3, B3Label)
+        IdiotLights["C1"] = (C1, C1Label)
+        IdiotLights["C2"] = (C2, C2Label)
+        IdiotLights["C3"] = (C3, C3Label)
     }
     
     var MPManager: MultiPeerManager
@@ -113,6 +118,14 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         let Parts = Name.split(separator: ".")
         return String(Parts[0])
+    }
+    
+    func AddLogMessage(Item: LogItem)
+    {
+        self.LogList.append(Item)
+        self.LogTable.reloadData()
+        self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
+                                  at: UITableView.ScrollPosition.bottom, animated: true)
     }
     
     func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [MCPeerID], Changed: MCPeerID, NewState: MCSessionState)
@@ -169,30 +182,196 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String)
+    func ControlIdiotLight(_ Raw: String)
     {
-        let (MessageType, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
-        if (MessageType == .EchoMessage)
-        {
-            DelaySomething(2.0, Closure: {self.MPMgr.Broadcast(Message: FinalMessage, To: Peer)})
-            return
-        }
-        if (MessageType == .Heartbeat)
-        {
-            DisplayHeartbeatData(FinalMessage, TimeStamp: TimeStamp, Host: HostName, Peer: Peer)
-            return
-        }
         OperationQueue.main.addOperation
             {
-                let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: FinalMessage)
-                Item.BGColor = UIColor(named: "Tomato")
-                Item.BGAnimateTargetColor = UIColor.white
-                Item.BGAnimateColorDuration = 2.0
-                Item.DoAnimateBGColor = true
-                self.LogList.append(Item)
-                self.LogTable.reloadData()
-                self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
-                                          at: UITableView.ScrollPosition.bottom, animated: true)
+                let (Command, Address, Text, FGColor, BGColor) = MessageHelper.DecodeIdiotLightMessage(Raw)
+                let FinalAddress = Address.uppercased()
+                print("Controlling idiot light at \(Address)")
+                switch Command
+                {
+                case .Disable:
+                    self.EnableIdiotLight(FinalAddress, false)
+                    
+                case .Enable:
+                    self.EnableIdiotLight(FinalAddress, true)
+                    
+                case .SetBGColor:
+                    self.IdiotLights[FinalAddress]!.0.backgroundColor = BGColor!
+                    let CS: String = BGColor!.AsHexString()
+                    print("BGColor for \(FinalAddress) = \(CS)")
+                    
+                case .SetFGColor:
+                    self.IdiotLights[FinalAddress]!.1.textColor = FGColor!
+                    let CS: String = FGColor!.AsHexString()
+                    print("BGColor for \(FinalAddress) = \(CS)")
+                    
+                case .SetText:
+                    self.IdiotLights[FinalAddress]!.1.text = Text
+                    
+                default:
+                    return
+                }
+        }
+    }
+    
+    func DoEcho(Delay: Int, Message: String)
+    {
+        if EchoTimer != nil
+        {
+            EchoTimer.invalidate()
+            EchoTimer = nil
+        }
+        MessageToEcho = Message
+        EchoTimer = Timer.scheduledTimer(timeInterval: Double(Delay), target: self,
+                                         selector: #selector(EchoSomething(_:)),
+                                         userInfo: Message as Any?, repeats: false)
+    }
+    
+    @objc func EchoSomething(_ Info: Any?)
+    {
+        let ReturnToSender = MessageToEcho//Info as? String
+        let Message = MessageHelper.MakeMessage(WithType: .EchoReturn, ReturnToSender!, GetDeviceName())
+        MPMgr.SendPreformatted(Message: Message, To: EchoBackTo)
+        let Item = LogItem(Text: "Echoing message to \(EchoBackTo.displayName)")
+        Item.HostName = "TDebug"
+        Item.BGColor = UIColor(named: "Tomato")
+        Item.BGAnimateTargetColor = UIColor(named: "Lavender")!
+        Item.BGAnimateColorDuration = 2.0
+        Item.DoAnimateBGColor = true
+        LogList.append(Item)
+    }
+    
+    var EchoTimer: Timer!
+    var EchoBackTo: MCPeerID!
+    var MessageToEcho: String!
+    
+    func HandleEchoMessage(_ Raw: String, Peer: MCPeerID)
+    {
+        let (EchoMessage, _, Delay, _) = MessageHelper.DecodeEchoMessage(Raw)
+        print("HandleEchoMessage: Delay=\(Delay)")
+        let REchoMessage = String(EchoMessage.reversed())
+        EchoBackTo = Peer
+        OperationQueue.main.addOperation
+            {
+                print("Echoing \(REchoMessage) to \(self.EchoBackTo.displayName) in \(Delay) seconds")
+                self.DoEcho(Delay: Delay, Message: REchoMessage)
+        }
+    }
+    
+    func ManageKVPData(_ Raw: String, Peer: MCPeerID)
+    {
+        OperationQueue.main.addOperation
+            {
+                let (ID, Key, Value) = MessageHelper.DecodeKVPMessage(Raw)
+                print("Received KVP \(Key):\(Value)")
+                if ID == nil
+                {
+                    let TimeStamp = MessageHelper.MakeTimeStamp(FromDate: Date())
+                    let Message = "Received KVP with Key of \"\(Key)\" and value of \"\(Value)\" but no valid ID."
+                    let Item = LogItem(TimeStamp: TimeStamp, Host: Peer.displayName, Text: Message, ShowInitialAnimation: true)
+                    self.AddLogMessage(Item: Item)
+                    return
+                }
+                self.AddKVPData(ID: ID!, Key, Value)
+        }
+    }
+    
+    func HandleSpecialCommand(_ Raw: String, Peer: MCPeerID)
+    {
+        OperationQueue.main.addOperation
+            {
+                let Operation = MessageHelper.DecodeSpecialCommand(Raw)
+                switch Operation
+                {
+                case .ClearIdiotLights:
+                    self.EnableIdiotLight("A2", false)
+                    self.EnableIdiotLight("A3", false)
+                    self.EnableIdiotLight("B1", false)
+                    self.EnableIdiotLight("B2", false)
+                    self.EnableIdiotLight("B3", false)
+                    self.EnableIdiotLight("C1", false)
+                    self.EnableIdiotLight("C2", false)
+                    self.EnableIdiotLight("C3", false)
+                    
+                case .ClearKVPList:
+                    self.KVPList.removeAll()
+                    self.KVPTable.reloadData()
+                    
+                case .ClearLogList:
+                    self.LogList.removeAll()
+                    self.LogTable.reloadData()
+                default:
+                    break
+                }
+        }
+    }
+    
+    func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String)
+    {
+        let MessageType = MessageHelper.GetMessageType(RawData)
+        print("MessageType=\(MessageType)")
+        switch MessageType
+        {
+        case .SpecialCommand:
+            HandleSpecialCommand(RawData, Peer: Peer)
+            
+        case .EchoMessage:
+            //Should be handled by the instance that received the echo.
+            HandleEchoMessage(RawData, Peer: Peer)
+            
+        case .Heartbeat:
+            let (_, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
+            DisplayHeartbeatData(FinalMessage, TimeStamp: TimeStamp, Host: HostName, Peer: Peer)
+            
+        case .ControlIdiotLight:
+            ControlIdiotLight(RawData)
+            
+        case .KVPData:
+            ManageKVPData(RawData, Peer: Peer)
+            
+        case .EchoReturn:
+            //Should be handled by the instance that sent the echo in the first place.
+            let (_, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
+            OperationQueue.main.addOperation
+                {
+                    let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: "Echo returned: " + FinalMessage,
+                                       ShowInitialAnimation: true, FinalBG: UIColor(named: "GrannySmith")!)
+                    self.AddLogMessage(Item: Item)
+                    #if false
+                    Item.BGColor = UIColor(named: "Tomato")
+                    Item.BGAnimateTargetColor = UIColor(named: "GrannySmith")!
+                    Item.BGAnimateColorDuration = 2.0
+                    Item.DoAnimateBGColor = true
+                    self.LogList.append(Item)
+                    self.LogTable.reloadData()
+                    self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
+                                              at: UITableView.ScrollPosition.bottom, animated: true)
+                    #endif
+            }
+            
+        case .TextMessage:
+            let (_, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
+            OperationQueue.main.addOperation
+                {
+                    let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: FinalMessage, ShowInitialAnimation: true,
+                                       FinalBG: UIColor.white)
+                    self.AddLogMessage(Item: Item)
+                    #if false
+                    Item.BGColor = UIColor(named: "Tomato")
+                    Item.BGAnimateTargetColor = UIColor.white
+                    Item.BGAnimateColorDuration = 2.0
+                    Item.DoAnimateBGColor = true
+                    self.LogList.append(Item)
+                    self.LogTable.reloadData()
+                    self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
+                                              at: UITableView.ScrollPosition.bottom, animated: true)
+                    #endif
+            }
+            
+        default:
+            break
         }
     }
     
@@ -256,41 +435,86 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func InitializeUI()
     {
-        IDTable.layer.cornerRadius = 5.0
-        IDTable.layer.borderColor = UIColor.black.cgColor
-        IDTable.layer.borderWidth = 0.5
-        
-        StatusTable.layer.cornerRadius = 5.0
-        StatusTable.layer.borderColor = UIColor.black.cgColor
-        StatusTable.layer.borderWidth = 0.5
+        KVPTable.layer.cornerRadius = 5.0
+        KVPTable.layer.borderColor = UIColor.black.cgColor
+        KVPTable.layer.borderWidth = 0.5
         
         LogTable.layer.cornerRadius = 5.0
         LogTable.layer.borderColor = UIColor.black.cgColor
         LogTable.layer.borderWidth = 0.5
     }
     
-    func AddIDData(_ Name: String, _ Value: String)
+    func GetKVPByID(_ ID: UUID) -> KVPItem?
     {
-        IDList.append((Name, Value))
-        IDTable.reloadData()
+        for Item in KVPList
+        {
+            if Item.ID == ID
+            {
+                return Item
+            }
+        }
+        return nil
     }
     
-    func ClearIDList()
+    func AddKVPData(_ Name: String, _ Value: String)
     {
-        IDList.removeAll()
-        IDTable.reloadData()
+        KVPList.append(KVPItem(WithKey: Name, AndValue: Value))
+        KVPTable.reloadData()
     }
     
-    func AddStatusData(_ Name: String, _ Value: String)
+    /// Add data to the KVP table. If the data is already present (determined by the ID),
+    /// it is edited in place.
+    ///
+    /// - Parameters:
+    ///   - ID: ID of the data to add.
+    ///   - Name: Key name.
+    ///   - Value: Value associated with the key.
+    func AddKVPData(ID: UUID, _ Name: String, _ Value: String)
     {
-        StatusList.append((Name, Value))
-        StatusTable.reloadData()
+        if let ItemIndex = KVPList.firstIndex(where: {$0.ID == ID})
+        {
+            KVPList[ItemIndex].Key = Name
+            KVPList[ItemIndex].Value = Value
+        }
+        else
+        {
+            KVPList.append(KVPItem(ID, WithKey: Name, AndValue: Value))
+        }
+        KVPTable.reloadData()
     }
     
-    func ClearStatusList()
+    func RemoveKVP(ItemID: UUID)
     {
-        StatusList.removeAll()
-        StatusTable.reloadData()
+        KVPList.removeAll(where: {$0.ID == ItemID})
+        KVPTable.reloadData()
+    }
+    
+    func ClearKVPList()
+    {
+        KVPList.removeAll()
+        KVPTable.reloadData()
+    }
+    
+    func EnableIdiotLight(_ Address: String, _ DoEnable: Bool,
+                          _ EnableFGColor: UIColor = UIColor.black,
+                          _ EnableBGColor: UIColor = UIColor.white)
+    {
+        if DoEnable
+        {
+            UIView.animate(withDuration: 0.2, animations:
+                {
+                    self.IdiotLights[Address]!.0.backgroundColor = EnableBGColor
+                    self.IdiotLights[Address]!.1.textColor = EnableFGColor
+            })
+        }
+        else
+        {
+            UIView.animate(withDuration: 0.35, animations:
+                {
+                    self.IdiotLights[Address]!.0.backgroundColor = UIColor.white
+                    self.IdiotLights[Address]!.1.textColor = UIColor.clear
+            })
+        }
     }
     
     func EnableIdiotLight(_ Row: String, _ Column: Int, _ DoEnable: Bool,
@@ -356,11 +580,8 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         switch tableView.tag
         {
-        case IDTableTag:
+        case KVPTableTag:
             return IDTableCell.CellHeight
-            
-        case StatusTableTag:
-            return StatusTableCell.CellHeight
             
         case LogTableTag:
             return LogTableCell.CellHeight
@@ -374,11 +595,8 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         switch tableView.tag
         {
-        case IDTableTag:
-            return IDList.count
-            
-        case StatusTableTag:
-            return StatusList.count
+        case KVPTableTag:
+            return KVPList.count
             
         case LogTableTag:
             return LogList.count
@@ -392,11 +610,8 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         switch tableView.tag
         {
-        case IDTableTag:
+        case KVPTableTag:
             return MakeIDCell(indexPath.row)
-            
-        case StatusTableTag:
-            return MakeStatusCell(indexPath.row)
             
         case LogTableTag:
             return MakeLogCell(indexPath.row)
@@ -420,15 +635,8 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func MakeIDCell(_ Row: Int) -> UITableViewCell
     {
         let IDCell = IDTableCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "IDTableCell")
-        IDCell.SetData(Name: IDList[Row].0, Value: IDList[Row].1)
+        IDCell.SetData(Name: KVPList[Row].Key, Value: KVPList[Row].Value)
         return IDCell
-    }
-    
-    func MakeStatusCell(_ Row: Int) -> UITableViewCell
-    {
-        let StatusCell = StatusTableCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: "StatusTableCell")
-        StatusCell.SetData(Name: StatusList[Row].0, Value: StatusList[Row].1)
-        return StatusCell
     }
     
     func MakeLogCell(_ Row: Int) -> UITableViewCell
@@ -585,16 +793,15 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let ThisDevice = ConvertToNetworkName(GetDeviceName())
         let Alert = UIAlertController(title: "Server List",
                                       message: "Current list of peers that are advertising.",
-                                      preferredStyle: UIAlertController.Style.alert)
+                                      preferredStyle: UIAlertController.Style.actionSheet)
         for Index in 0 ..< ServerList.count
         {
             var IsSelf = false
-            //print("\(ThisDevice): \(ConvertToNetworkName(ServerList[Index].displayName))")
             if ConvertToNetworkName(ServerList[Index].displayName) == ThisDevice
             {
                 IsSelf = true
             }
-            let Title = "\(Index + 1). " + ServerList[Index].displayName
+            let Title = ServerList[Index].displayName
             let AAction = UIAlertAction(title: Title, style: UIAlertAction.Style.default, handler: nil)
             Alert.addAction(AAction)
             if IsSelf
@@ -610,9 +817,10 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         present(Alert, animated: true, completion: nil)
     }
     
-    var IDList = [(String, String)]()
-    var StatusList = [(String, String)]()
+    var KVPList = [KVPItem]()
     var LogList = [LogItem]()
+    
+    var IdiotLights = [String: (UIView, UILabel)]()
     
     @IBOutlet weak var A1Label: UILabel!
     @IBOutlet weak var A2Label: UILabel!
@@ -633,7 +841,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet weak var C2: UIView!
     @IBOutlet weak var C3: UIView!
     @IBOutlet weak var IdiotLightContainer: UIView!
-    @IBOutlet weak var IDTable: UITableView!
-    @IBOutlet weak var StatusTable: UITableView!
+    @IBOutlet weak var KVPTable: UITableView!
     @IBOutlet weak var LogTable: UITableView!
 }
