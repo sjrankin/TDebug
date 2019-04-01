@@ -11,18 +11,18 @@ import UIKit
 import MultipeerConnectivity
 
 class MainController: UIViewController, UITableViewDelegate, UITableViewDataSource,
-    /*CommDelegate, ManualConnectProtocol,*/ MultiPeerDelegate, MainProtocol
+    MultiPeerDelegate, MainProtocol, StateProtocol
 {
     var HostNames: [String]? = nil
     
     let KVPTableTag = 100
     let LogTableTag = 300
-    var TComm: Comm!
     var MPMgr: MultiPeerManager!
     
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        State.Initialize(WithDelegate: self)
         InitializeUI()
         
         MPMgr = MultiPeerManager()
@@ -46,19 +46,11 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         AddKVPData("Build", "\(Versioning.Build)")
         AddKVPData("This Host", GetDeviceName())
         let SomeItem = LogItem(ItemID: UUID(),
-                               TimeStamp: Comm.MakeTimeStamp(FromDate: Date()),
+                               TimeStamp: MessageHelper.MakeTimeStamp(FromDate: Date()),
                                Text: Versioning.MakeVersionBlock() + "\n" + "Running on \(GetDeviceName())")
         SomeItem.HostName = "TDebug"
         SomeItem.BGColor = UIColor(named: "Lavender")
         LogList.append(SomeItem)
-        
-        #if false
-        let AppDel = UIApplication.shared.delegate as! AppDelegate
-        TComm = AppDel.TComm
-        TComm.CallerDelegate = self
-        TComm.Start()
-        TComm.SearchForServices()
-        #endif
         
         SetIdiotLight("A", 1, "Not Connected", UIColor.white, UIColor(red: 0.5, green: 0.0, blue: 0.0, alpha: 1.0))
         EnableIdiotLight("A", 2, false)
@@ -69,17 +61,24 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         EnableIdiotLight("C", 1, false)
         EnableIdiotLight("C", 2, false)
         EnableIdiotLight("C", 3, false)
-        
-        #if false
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(EnteredBackground),
-                                               name: UIApplication.willResignActiveNotification,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(EnteredForeground),
-                                               name: UIApplication.willEnterForegroundNotification,
-                                               object: nil)
-        #endif
+    }
+    
+    func StateChanged(NewState: States, HandShake: HandShakeCommands)
+    {
+        OperationQueue.main.addOperation
+            {
+                switch HandShake
+                {
+                case .ConnectionGranted:
+                    self.SetIdiotLight("A", 1, "Connected", UIColor.black, UIColor.green)
+                    
+                case .Disconnected:
+                    self.SetIdiotLight("A", 1, "Not Connected", UIColor.white, UIColor(red: 0.5, green: 0.0, blue: 0.0, alpha: 1.0))
+                    
+                default:
+                    break
+                }
+        }
     }
     
     override func viewDidLayoutSubviews()
@@ -122,10 +121,13 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func AddLogMessage(Item: LogItem)
     {
+        OperationQueue.main.addOperation
+            {
         self.LogList.append(Item)
         self.LogTable.reloadData()
         self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
                                   at: UITableView.ScrollPosition.bottom, animated: true)
+        }
     }
     
     func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [MCPeerID], Changed: MCPeerID, NewState: MCSessionState)
@@ -146,8 +148,12 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         default:
             NewStateName = "undetermined"
         }
-        print("Device \(ChangedPeerName) is now \"\(NewStateName)\"")
+        let Item = LogItem(Text: "Device \(ChangedPeerName) is now \(NewStateName).")
+        AddLogMessage(Item: Item)
+        AddKVPData(ID: ConnectCountID, "Peers", "\(ConnectedDevices.count)")
     }
+    
+    let ConnectCountID = UUID()
     
     func DelaySomething(_ BySeconds: Double, Closure: @escaping() -> ())
     {
@@ -308,12 +314,76 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+    func HandleHandShakeCommand(_ Raw: String, Peer: MCPeerID)
+    {
+        let Command = MessageHelper.DecodeHandShakeCommand(Raw)
+        print("Handshake command: \(Command)")
+        OperationQueue.main.addOperation
+            {
+        let ReturnMe = State.TransitionTo(NewState: Command)
+                print("State result=\(ReturnMe), State.CurrentState=\(State.CurrentState)")
+                var ReturnState = ""
+                switch ReturnMe
+                {
+                case .ConnectionClose:
+                    break
+                    
+                case .ConnectionGranted:
+                    let Item = LogItem(Text: "\(Peer.displayName) is debugee.")
+                    self.AddLogMessage(Item: Item)
+                    ReturnState = MessageHelper.MakeHandShake(ReturnMe)
+                    
+                case .ConnectionRefused:
+                    let Item = LogItem(Text: "Connection refused by \(Peer.displayName)")
+                    self.AddLogMessage(Item: Item)
+                    ReturnState = MessageHelper.MakeHandShake(ReturnMe)
+                    
+                case .Disconnected:
+                    ReturnState = MessageHelper.MakeHandShake(ReturnMe)
+                    
+                case .RequestConnection:
+                    break
+                    
+                case .Unknown:
+                    break
+                }
+                if !ReturnState.isEmpty
+                {
+                self.MPMgr.SendPreformatted(Message: ReturnState, To: Peer)
+                }
+        }
+    }
+    
+    func HandleEchoReturn(_ Raw: String)
+    {
+        let (_, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(Raw)
+        OperationQueue.main.addOperation
+            {
+                let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: "Echo returned: " + FinalMessage,
+                                   ShowInitialAnimation: true, FinalBG: UIColor(named: "GrannySmith")!)
+                self.AddLogMessage(Item: Item)
+        }
+    }
+    
+    func HandleTextMessage(_ Raw: String)
+    {
+        let (_, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(Raw)
+        OperationQueue.main.addOperation
+            {
+                let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: FinalMessage, ShowInitialAnimation: true,
+                                   FinalBG: UIColor.white)
+                self.AddLogMessage(Item: Item)
+        }
+    }
+    
     func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String)
     {
         let MessageType = MessageHelper.GetMessageType(RawData)
-        print("MessageType=\(MessageType)")
         switch MessageType
         {
+        case .HandShake:
+            HandleHandShakeCommand(RawData, Peer: Peer)
+            
         case .SpecialCommand:
             HandleSpecialCommand(RawData, Peer: Peer)
             
@@ -333,105 +403,15 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
         case .EchoReturn:
             //Should be handled by the instance that sent the echo in the first place.
-            let (_, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
-            OperationQueue.main.addOperation
-                {
-                    let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: "Echo returned: " + FinalMessage,
-                                       ShowInitialAnimation: true, FinalBG: UIColor(named: "GrannySmith")!)
-                    self.AddLogMessage(Item: Item)
-                    #if false
-                    Item.BGColor = UIColor(named: "Tomato")
-                    Item.BGAnimateTargetColor = UIColor(named: "GrannySmith")!
-                    Item.BGAnimateColorDuration = 2.0
-                    Item.DoAnimateBGColor = true
-                    self.LogList.append(Item)
-                    self.LogTable.reloadData()
-                    self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
-                                              at: UITableView.ScrollPosition.bottom, animated: true)
-                    #endif
-            }
+            HandleEchoReturn(RawData)
             
         case .TextMessage:
-            let (_, HostName, TimeStamp, FinalMessage) = MessageHelper.DecodeMessage(RawData)
-            OperationQueue.main.addOperation
-                {
-                    let Item = LogItem(TimeStamp: TimeStamp, Host: HostName, Text: FinalMessage, ShowInitialAnimation: true,
-                                       FinalBG: UIColor.white)
-                    self.AddLogMessage(Item: Item)
-                    #if false
-                    Item.BGColor = UIColor(named: "Tomato")
-                    Item.BGAnimateTargetColor = UIColor.white
-                    Item.BGAnimateColorDuration = 2.0
-                    Item.DoAnimateBGColor = true
-                    self.LogList.append(Item)
-                    self.LogTable.reloadData()
-                    self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
-                                              at: UITableView.ScrollPosition.bottom, animated: true)
-                    #endif
-            }
-            
+            HandleTextMessage(RawData)
+
         default:
             break
         }
     }
-    
-    #if false
-    func SetSelectedHost(HostName: String, Server: NetService?)
-    {
-        if HostName.isEmpty
-        {
-            return
-        }
-        print("User selected host: \(HostName)")
-        CurrentHost = HostName
-        CurrentServer = Server
-    }
-    
-    var CurrentHost: String = ""
-    var CurrentServer: NetService? = nil
-    
-    func RawDataReceived(_ RawData: String, _ BytesRead: Int)
-    {
-        if RawData.isEmpty
-        {
-            print("Received empty message.")
-            return
-        }
-        print("Received raw data from remote system.")
-        let (Source, TS, Message) = TComm.SplitMessage(RawData)
-        let ItemText = "From \(Source): \(Message)"
-        let Item = LogItem(TimeStamp: TS, Text: ItemText)
-        Item.BGColor = UIColor(named: "Tomato")
-        Item.BGAnimateTargetColor = UIColor.white
-        Item.BGAnimateColorDuration = 2.0
-        Item.DoAnimateBGColor = true
-        LogList.append(Item)
-        LogTable.reloadData()
-        LogTable.scrollToRow(at: IndexPath(row: LogList.count - 1, section: 0), at: UITableView.ScrollPosition.bottom, animated: true)
-    }
-    
-    func RemoteServerList(_ List: [(String, NetService)])
-    {
-        //Got remote server list.
-        for SomeServer in List
-        {
-            let SomeItem = LogItem(ItemID: UUID(), TimeStamp: Comm.MakeTimeStamp(FromDate: Date()), Text: "Remote server: " + SomeServer.0)
-            SomeItem.BGColor = UIColor(named: "Lavender")
-            LogList.append(SomeItem)
-        }
-        LogTable.reloadData()
-    }
-    
-    @objc func EnteredBackground(_ notification: Notification)
-    {
-        //TComm.HandleEnteredBackground()
-    }
-    
-    @objc func EnteredForeground(_ notification: Notification)
-    {
-        //TComm.HandleEnteredForeground()
-    }
-    #endif
     
     func InitializeUI()
     {
@@ -471,16 +451,19 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     ///   - Value: Value associated with the key.
     func AddKVPData(ID: UUID, _ Name: String, _ Value: String)
     {
-        if let ItemIndex = KVPList.firstIndex(where: {$0.ID == ID})
+        OperationQueue.main.addOperation
+            {
+        if let ItemIndex = self.KVPList.firstIndex(where: {$0.ID == ID})
         {
-            KVPList[ItemIndex].Key = Name
-            KVPList[ItemIndex].Value = Value
+            self.KVPList[ItemIndex].Key = Name
+            self.KVPList[ItemIndex].Value = Value
         }
         else
         {
-            KVPList.append(KVPItem(ID, WithKey: Name, AndValue: Value))
+            self.KVPList.append(KVPItem(ID, WithKey: Name, AndValue: Value))
         }
-        KVPTable.reloadData()
+        self.KVPTable.reloadData()
+        }
     }
     
     func RemoveKVP(ItemID: UUID)
@@ -706,11 +689,6 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     @IBAction func HandleActionButton(_ sender: Any)
     {
-    }
-    
-    @IBAction func HandleConnectButton(_ sender: Any)
-    {
-        performSegue(withIdentifier: "ToConnector", sender: self)
     }
     
     func GetLogItem(_ FromID: UUID) -> LogItem
