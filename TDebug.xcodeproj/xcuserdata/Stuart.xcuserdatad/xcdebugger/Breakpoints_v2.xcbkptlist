@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "TDebug/ClientTest/ClientTestUICode.swift"
-            timestampString = "575728700.164493"
+            timestampString = "575789352.584798"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "273"
-            endingLineNumber = "273"
+            startingLineNumber = "252"
+            endingLineNumber = "252"
             landmarkName = "EchoRepeater(_:)"
             landmarkType = "7">
          </BreakpointContent>
