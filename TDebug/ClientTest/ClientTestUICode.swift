@@ -11,7 +11,7 @@ import UIKit
 import MultipeerConnectivity
 
 class ClientTestUICode: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDelegate,
-    UIPickerViewDataSource, MultiPeerDelegate
+    UIPickerViewDataSource
 {
     let IdiotLightAddresses = 100
     let IdiotLightCommands = 200
@@ -23,13 +23,7 @@ class ClientTestUICode: UIViewController, UITableViewDelegate, UITableViewDataSo
     {
         super.viewDidLoad()
         
-        #if true
         MPMgr = Main?.MPManager
-        #else
-        MPMgr = MultiPeerManager()
-        MPMgr?.Delegate = self
-        MPMgr?.IsDebugHost = false
-        #endif
         ServerList = (MPMgr?.GetPeerList())!
         if ServerList.count > 0
         {
@@ -68,14 +62,6 @@ class ClientTestUICode: UIViewController, UITableViewDelegate, UITableViewDataSo
         ServerMessageTable.reloadData()
     }
     
-    #if false
-    override func viewWillAppear(_ animated: Bool)
-    {
-        super.viewWillAppear(animated)
-        BusyIndicator.isHidden = true
-    }
-    #endif
-    
     override func viewDidLayoutSubviews()
     {
         BusyIndicator.isHidden = true
@@ -83,19 +69,12 @@ class ClientTestUICode: UIViewController, UITableViewDelegate, UITableViewDataSo
     
     override func viewWillDisappear(_ animated: Bool)
     {
+        if CurrentHostIndex > -1
+        {
+            let Disconnect = MessageHelper.MakeHandShake(.ConnectionClose)
+            MPMgr?.SendPreformatted(Message: Disconnect, To: ServerList[CurrentHostIndex])
+        }
         super.viewWillDisappear(animated)
-        //MPMgr?.Shutdown()
-        //MPMgr = nil
-    }
-    
-    func ConnectedDeviceChanged(Manager: MultiPeerManager, ConnectedDevices: [MCPeerID], Changed: MCPeerID, NewState: MCSessionState)
-    {
-        
-    }
-    
-    func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String)
-    {
-        
     }
     
     var ServerList = [MCPeerID]()
@@ -377,10 +356,18 @@ class ClientTestUICode: UIViewController, UITableViewDelegate, UITableViewDataSo
         {
             return
         }
+        let FirstIndex = CurrentHostIndex
         let Parts = Alert.title!.split(separator: ".")
         let Index = Int(String(Parts[0]))! - 1
         CurrentHostIndex = Index
         ServerButton.title = "Server: " + ServerList[Index].displayName
+        if FirstIndex != -1
+        {
+            let Disconnect = MessageHelper.MakeHandShake(.ConnectionClose)
+            MPMgr?.SendPreformatted(Message: Disconnect, To: ServerList[FirstIndex])
+        }
+        let ConnectRequest = MessageHelper.MakeHandShake(.RequestConnection)
+        MPMgr?.SendPreformatted(Message: ConnectRequest, To: ServerList[Index])
     }
     
     var CurrentHostIndex: Int = -1
