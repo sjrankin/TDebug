@@ -312,7 +312,6 @@
                         <outlet property="IdiotLightContainer" destination="y6a-GX-7oq" id="Kb2-nU-M7j"/>
                         <outlet property="KVPTable" destination="ROp-Ia-FGR" id="d5B-ec-XWF"/>
                         <outlet property="LogTable" destination="RAZ-HR-0B9" id="W4p-cW-cIP"/>
-                        <segue destination="DtW-tp-80w" kind="show" identifier="ToConnector" id="Rgz-R0-UdQ"/>
                         <segue destination="Qit-Fe-MK9" kind="show" identifier="ToLogItemViewer" id="Bh2-m1-EuO"/>
                     </connections>
                 </viewController>
@@ -327,14 +326,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eJR-kM-iGg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="677" y="67"/>
-        </scene>
-        <!--ManualConnect-->
-        <scene sceneID="VJ8-LA-xZS">
-            <objects>
-                <viewControllerPlaceholder storyboardName="ManualConnect" id="DtW-tp-80w" sceneMemberID="viewController"/>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="7P1-XD-uec" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="646" y="250"/>
         </scene>
         <!--LogItemViewer-->
         <scene sceneID="7rL-pR-moM">
