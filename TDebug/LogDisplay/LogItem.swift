@@ -18,7 +18,7 @@ class LogItem
     init(Text: String, ShowInitialAnimation: Bool = true, FinalBG: UIColor = UIColor.white)
     {
         _ID = UUID()
-        Title = Comm.MakeTimeStamp(FromDate: Date())
+        Title = MessageHelper.MakeTimeStamp(FromDate: Date())
         Message = Text
         DoAnimateBGColor = ShowInitialAnimation
         if ShowInitialAnimation
