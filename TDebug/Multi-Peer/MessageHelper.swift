@@ -27,6 +27,27 @@ class MessageHelper
         return (String(Parts[0]), String(Parts[1]))
     }
     
+    public static func DecodeHandShakeCommand(_ Raw: String) -> HandShakeCommands
+    {
+        let Delimiter = String(Raw.first!)
+        var Next = Raw
+        Next.removeFirst()
+        let Parts = Next.split(separator: String.Element(Delimiter))
+        if Parts.count != 2
+        {
+            return HandShakeCommands.Unknown
+        }
+        let SCmd = String(Parts[1])
+        for (Command, Indicator) in HandShakeIndicators
+        {
+            if Indicator.lowercased() == SCmd.lowercased()
+            {
+                return Command
+            }
+        }
+        return HandShakeCommands.Unknown
+    }
+    
     public static func DecodeSpecialCommand(_ Raw: String) -> SpecialCommands
     {
         let Delimiter = String(Raw.first!)
@@ -499,6 +520,15 @@ class MessageHelper
         return Final
     }
     
+    public static func MakeHandShake(_ Command: HandShakeCommands) -> String
+    {
+        let Cmd = MessageTypeIndicators[.HandShake]!
+        let SCmd = HandShakeIndicators[Command]!
+        let Delimiter = GetUnusedDelimiter(From: [Cmd, SCmd])
+        let Final = AssembleCommand(FromParts: [Cmd, SCmd], WithDelimiter: Delimiter)
+        return Final
+    }
+    
     static func AssembleCommand(FromParts: [String], WithDelimiter: String) -> String
     {
         var Final = ""
@@ -520,6 +550,7 @@ class MessageHelper
             MessageTypes.KVPData: "4c2805b8-d5ad-4c68-a5f8-1f554a90671a",
             MessageTypes.EchoReturn: "970bac64-f399-499d-8db6-c65e508ae40d",
             MessageTypes.SpecialCommand: "e83a5588-b285-49ee-b2fe-95f803f073b7",
+            MessageTypes.HandShake: "52c4be7a-b84f-4812-880e-98b4c67543fb",
             MessageTypes.Unknown: "dfc5b2d5-521b-46a8-b459-a4947089312c",
     ]
     
@@ -530,6 +561,16 @@ class MessageHelper
         .ClearIdiotLights: "1600bf5d-ffa7-474b-ab55-c8298f056969",
         .Unknown: "bbfb4205-d9f6-49cf-bd96-630641d4fb16",
     ]
+    
+    private static let HandShakeIndicators: [HandShakeCommands: String] =
+    [
+        .RequestConnection: "6dc88b50-15c0-41e0-aa6f-c1c33d93303b",
+        .ConnectionGranted: "fceee865-ccdc-4c6b-8944-3a959a64d894",
+        .ConnectionRefused: "b32f179c-c1b4-40c3-8bb0-ad84a985bad4",
+        .ConnectionClose: "70b6f26c-92fc-423f-9ea4-418d51cc0528",
+        .Disconnected: "78dfa276-48f3-47bc-88bc-4f46bd9f74ce",
+        .Unknown: "1f9e85e3-446b-4c93-b93d-ea8d6955f4bb",
+    ]
 }
 
 enum SpecialCommands: Int
@@ -537,6 +578,16 @@ enum SpecialCommands: Int
     case ClearKVPList = 0
     case ClearLogList = 1
     case ClearIdiotLights = 2
+    case Unknown = 10000
+}
+
+enum HandShakeCommands: Int
+{
+    case RequestConnection = 0
+    case ConnectionGranted = 1
+    case ConnectionRefused = 2
+    case ConnectionClose = 3
+    case Disconnected = 4
     case Unknown = 10000
 }
 
@@ -551,6 +602,7 @@ enum MessageTypes: Int
     case KVPData = 6
     case EchoReturn = 7
     case SpecialCommand = 8
+    case HandShake = 9
     case Unknown = 10000
 }
 
