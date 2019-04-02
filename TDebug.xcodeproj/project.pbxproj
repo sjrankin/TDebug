@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1704C5BA2253371B00C49E91 /* ClientCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1704C5B92253371B00C49E91 /* ClientCommands.swift */; };
 		170DD2612251C6DB0017931C /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170DD2602251C6DB0017931C /* State.swift */; };
 		170DD2642251C8FF0017931C /* StateProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 170DD2632251C8FF0017931C /* StateProtocol.swift */; };
 		171A2DEF224DD54000B3D556 /* MultiPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DEE224DD54000B3D556 /* MultiPeer.swift */; };
@@ -43,6 +44,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1704C5B92253371B00C49E91 /* ClientCommands.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientCommands.swift; sourceTree = "<group>"; };
 		170DD2602251C6DB0017931C /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		170DD2632251C8FF0017931C /* StateProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateProtocol.swift; sourceTree = "<group>"; };
 		171A2DEE224DD54000B3D556 /* MultiPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiPeer.swift; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 		171A2DED224DD52600B3D556 /* Multi-Peer */ = {
 			isa = PBXGroup;
 			children = (
+				1704C5B92253371B00C49E91 /* ClientCommands.swift */,
 				171A2DEE224DD54000B3D556 /* MultiPeer.swift */,
 				171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */,
 				171A2DF4224DF3E100B3D556 /* MessageHelper.swift */,
@@ -307,6 +310,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1704C5BA2253371B00C49E91 /* ClientCommands.swift in Sources */,
 				177FAB2B224A46CB00379A4C /* CommandObject.swift in Sources */,
 				170DD2642251C8FF0017931C /* StateProtocol.swift in Sources */,
 				1734ABF82248862A007059F3 /* LogItem.swift in Sources */,
