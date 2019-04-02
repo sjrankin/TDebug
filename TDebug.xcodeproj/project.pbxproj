@@ -26,6 +26,7 @@
 		1734ABFA2248889C007059F3 /* IDTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABF92248889C007059F3 /* IDTableCell.swift */; };
 		1734ABFE22488DCB007059F3 /* LogTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABFD22488DCB007059F3 /* LogTableCell.swift */; };
 		1734AC022248CDB6007059F3 /* SendToRemote.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1734AC012248CDB6007059F3 /* SendToRemote.storyboard */; };
+		1772A2FE22537D68006D0A16 /* OSColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1772A2FD22537D68006D0A16 /* OSColor.swift */; };
 		177FAB28224A468A00379A4C /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB27224A468A00379A4C /* CommandParser.swift */; };
 		177FAB2B224A46CB00379A4C /* CommandObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB2A224A46CB00379A4C /* CommandObject.swift */; };
 		177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB2C224A46EA00379A4C /* CommandProtocol.swift */; };
@@ -35,7 +36,7 @@
 		177FAB36224A58A400379A4C /* Command_AddToID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB35224A58A400379A4C /* Command_AddToID.swift */; };
 		177FAB38224A592100379A4C /* Command_DisableIdiotLight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB37224A592100379A4C /* Command_DisableIdiotLight.swift */; };
 		177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */; };
-		178C04E6224F396E00D724FE /* UIColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178C04E5224F396E00D724FE /* UIColorExtensions.swift */; };
+		178C04E6224F396E00D724FE /* OSColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 178C04E5224F396E00D724FE /* OSColorExtensions.swift */; };
 		179B8FD322509D4E0012C913 /* KVPItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179B8FD222509D4E0012C913 /* KVPItem.swift */; };
 		17EF4158224B71F50008EB83 /* LogItemViewer.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 17EF4157224B71F50008EB83 /* LogItemViewer.storyboard */; };
 		17EF415A224B8BFC0008EB83 /* LogItemViewerCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EF4159224B8BFC0008EB83 /* LogItemViewerCode.swift */; };
@@ -65,6 +66,7 @@
 		1734ABF92248889C007059F3 /* IDTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDTableCell.swift; sourceTree = "<group>"; };
 		1734ABFD22488DCB007059F3 /* LogTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTableCell.swift; sourceTree = "<group>"; };
 		1734AC012248CDB6007059F3 /* SendToRemote.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = SendToRemote.storyboard; sourceTree = "<group>"; };
+		1772A2FD22537D68006D0A16 /* OSColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSColor.swift; sourceTree = "<group>"; };
 		177FAB27224A468A00379A4C /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
 		177FAB2A224A46CB00379A4C /* CommandObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandObject.swift; sourceTree = "<group>"; };
 		177FAB2C224A46EA00379A4C /* CommandProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandProtocol.swift; sourceTree = "<group>"; };
@@ -74,7 +76,7 @@
 		177FAB35224A58A400379A4C /* Command_AddToID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_AddToID.swift; sourceTree = "<group>"; };
 		177FAB37224A592100379A4C /* Command_DisableIdiotLight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_DisableIdiotLight.swift; sourceTree = "<group>"; };
 		177FAB39224A598C00379A4C /* Command_SetIdiotLight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Command_SetIdiotLight.swift; sourceTree = "<group>"; };
-		178C04E5224F396E00D724FE /* UIColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorExtensions.swift; sourceTree = "<group>"; };
+		178C04E5224F396E00D724FE /* OSColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSColorExtensions.swift; sourceTree = "<group>"; };
 		179B8FD222509D4E0012C913 /* KVPItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KVPItem.swift; sourceTree = "<group>"; };
 		17EF4157224B71F50008EB83 /* LogItemViewer.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LogItemViewer.storyboard; sourceTree = "<group>"; };
 		17EF4159224B8BFC0008EB83 /* LogItemViewerCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogItemViewerCode.swift; sourceTree = "<group>"; };
@@ -105,10 +107,10 @@
 		171A2DED224DD52600B3D556 /* Multi-Peer */ = {
 			isa = PBXGroup;
 			children = (
-				1704C5B92253371B00C49E91 /* ClientCommands.swift */,
 				171A2DEE224DD54000B3D556 /* MultiPeer.swift */,
 				171A2DF0224DDFED00B3D556 /* MultiPeerDelegate.swift */,
 				171A2DF4224DF3E100B3D556 /* MessageHelper.swift */,
+				1704C5B92253371B00C49E91 /* ClientCommands.swift */,
 			);
 			path = "Multi-Peer";
 			sourceTree = "<group>";
@@ -164,11 +166,20 @@
 				171A2DF6224E08F800B3D556 /* SendTo */,
 				171A2DED224DD52600B3D556 /* Multi-Peer */,
 				17EF415D224B8FC20008EB83 /* LogDisplay */,
+				1772A2FC22537D53006D0A16 /* OSColor */,
 				178C04E4224F395900D724FE /* Extensions */,
 				177FAB29224A46B500379A4C /* Commands */,
 				171A2DFB224E0AC600B3D556 /* MainProtocol.swift */,
 			);
 			path = TDebug;
+			sourceTree = "<group>";
+		};
+		1772A2FC22537D53006D0A16 /* OSColor */ = {
+			isa = PBXGroup;
+			children = (
+				1772A2FD22537D68006D0A16 /* OSColor.swift */,
+			);
+			path = OSColor;
 			sourceTree = "<group>";
 		};
 		177FAB29224A46B500379A4C /* Commands */ = {
@@ -198,7 +209,7 @@
 		178C04E4224F395900D724FE /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				178C04E5224F396E00D724FE /* UIColorExtensions.swift */,
+				178C04E5224F396E00D724FE /* OSColorExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -315,13 +326,14 @@
 				170DD2642251C8FF0017931C /* StateProtocol.swift in Sources */,
 				1734ABF82248862A007059F3 /* LogItem.swift in Sources */,
 				171A2DF5224DF3E100B3D556 /* MessageHelper.swift in Sources */,
+				1772A2FE22537D68006D0A16 /* OSColor.swift in Sources */,
 				171A2DF1224DDFED00B3D556 /* MultiPeerDelegate.swift in Sources */,
 				177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */,
 				177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */,
 				1734ABF6224883D3007059F3 /* MainController.swift in Sources */,
 				170DD2612251C6DB0017931C /* State.swift in Sources */,
 				177FAB34224A4B2700379A4C /* CommandObjectProtocol.swift in Sources */,
-				178C04E6224F396E00D724FE /* UIColorExtensions.swift in Sources */,
+				178C04E6224F396E00D724FE /* OSColorExtensions.swift in Sources */,
 				171A2DF8224E091400B3D556 /* SendToRemoteCode.swift in Sources */,
 				171A2E01224E40A700B3D556 /* ClientTestUICode.swift in Sources */,
 				1734ABE422487F80007059F3 /* AppDelegate.swift in Sources */,
