@@ -282,10 +282,10 @@ class ClientTestUICode: UIViewController, UITableViewDelegate, UITableViewDataSo
             Message = MessageHelper.MakeIdiotLightMessage(Address: Address, State: UIFeatureStates.Disabled)
             
         case "FGColor":
-            Message = MessageHelper.MakeIdiotLightMessage(Address: Address, FGColor: UIColor.MakeRandomColor(.Dark))
+            Message = MessageHelper.MakeIdiotLightMessage(Address: Address, FGColor: OSColor.MakeRandomColor(.Dark))
             
         case "BGColor":
-            Message = MessageHelper.MakeIdiotLightMessage(Address: Address, BGColor: UIColor.MakeRandomColor(.Light))
+            Message = MessageHelper.MakeIdiotLightMessage(Address: Address, BGColor: OSColor.MakeRandomColor(.Light))
         default:
             print("Unknown idiot light command received: \(Command).")
             return
