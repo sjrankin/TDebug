@@ -18,7 +18,11 @@ import MultipeerConnectivity
 class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBrowserDelegate, MCSessionDelegate
 {
     private let TDebugServiceType = "debug-sink"
-    private let PeerID = MCPeerID(displayName: UIDevice.current.name) 
+    #if FOR_MACOS
+    private let PeerID = MCPeerID(displayName: Host.current().name!)
+    #else
+    private let PeerID = MCPeerID(displayName: UIDevice.current.name)
+    #endif
     private let ServiceAdvertiser: MCNearbyServiceAdvertiser!
     private let ServiceBrower: MCNearbyServiceBrowser!
     var Delegate: MultiPeerDelegate? = nil
@@ -146,13 +150,33 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
         }
     }
     
+    /// Send a message to the specified client with an exepcted, asynchronous response to be returned at some point in the future.
+    ///
+    /// - Parameters:
+    ///   - Message: Message to send to the client.
+    ///   - To: The ID of the client/remote system to send the message to.
+    /// - Returns: The ID of the message that was sent.
+    func SendWithAsyncResponse(Message: String, To: MCPeerID) -> UUID
+    {
+        let MessageID = UUID()
+        let Encapsulated = MessageHelper.MakeEncapsulatedCommand(WithID: MessageID, Payload: Message)
+        do
+        {
+            try Session.send(Encapsulated.data(using: String.Encoding.utf8)!, toPeers: [To], with: .reliable)
+        }
+        catch
+        {
+            print("Error sending message to \(To.displayName): \(error.localizedDescription)")
+        }
+        return MessageID
+    }
+    
     /// Return the list of connected peers.
     ///
     /// - Returns: List of connected peers. May change over time so call periodically.
     func GetPeerList() -> [MCPeerID]
     {
         let PeerList: [MCPeerID] = Session.connectedPeers
-        //print("MultiPeer: PeerList.count=\(PeerList.count)")
         return PeerList
     }
     
@@ -226,6 +250,10 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
     
     /// Handle the received data from a session event.
     ///
+    /// - Note: The recevied data is checked to see if it's encapsulated and if it is, will be returned via
+    ///         the async response mechanism, eg, returned via the `ReceivedAsyncData` function. Otherwise, if
+    ///         the command is non-asynchronous, it is returned via the `ReceivedData` function.
+    ///
     /// - Parameters:
     ///   - session: The session for the peer.
     ///   - data: The data sent by the peer.
@@ -233,7 +261,17 @@ class MultiPeerManager: NSObject, MCNearbyServiceAdvertiserDelegate, MCNearbySer
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID)
     {
         let Message = String(data: data, encoding: .utf8)
-        Delegate?.ReceivedData(Manager: self, Peer: peerID, RawData: Message!)
+        let Cmd = MessageHelper.GetMessageType(Message!)
+        if Cmd == MessageTypes.IDEncapsulatedCommand
+        {
+            if let (ID, EnMsg) = MessageHelper.DecodeEncapsulatedCommand(Message!)
+            {
+                Delegate?.ReceivedAsyncData(Manager: self, Peer: peerID, CommandID: ID, RawData: EnMsg)
+                return
+            }
+        }
+        Delegate?.ReceivedData(Manager: self, Peer: peerID, RawData: Message!,
+                               OverrideMessageType: nil, EncapsulatedID: nil)
     }
     
     /// Handle the received input stream from a session event.
