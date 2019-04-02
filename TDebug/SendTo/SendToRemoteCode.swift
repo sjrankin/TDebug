@@ -69,7 +69,7 @@ class SendToRemoteCode: UIViewController, UITableViewDelegate, UITableViewDataSo
                 return
             }
             let PeerID = PeerList[SelectedIndex]
-            Main?.MPManager.SendPreformatted(Message: Message, To: PeerID)
+            Main?.MPManager.Send(Message: Message, To: PeerID)
         }
         TextBox.text = ""
     }
