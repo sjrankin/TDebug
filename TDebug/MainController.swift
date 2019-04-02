@@ -18,6 +18,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     let KVPTableTag = 100
     let LogTableTag = 300
     var MPMgr: MultiPeerManager!
+    var LocalCommands: ClientCommands!
     
     override func viewDidLoad()
     {
@@ -27,6 +28,8 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         MPMgr = MultiPeerManager()
         MPMgr.Delegate = self
+        
+        LocalCommands = ClientCommands()
         
         KVPTable.delegate = self
         KVPTable.dataSource = self
@@ -123,10 +126,10 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         OperationQueue.main.addOperation
             {
-        self.LogList.append(Item)
-        self.LogTable.reloadData()
-        self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
-                                  at: UITableView.ScrollPosition.bottom, animated: true)
+                self.LogList.append(Item)
+                self.LogTable.reloadData()
+                self.LogTable.scrollToRow(at: IndexPath(row: self.LogList.count - 1, section: 0),
+                                          at: UITableView.ScrollPosition.bottom, animated: true)
         }
     }
     
@@ -314,13 +317,53 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+    func GetCommandsFromClient(_ Peer: MCPeerID)
+    {
+        let GetClientCmds = MessageHelper.MakeGetAllClientCommands()
+        let EncapsulatedID = MPMgr.SendWithAsyncResponse(Message: GetClientCmds, To: Peer)
+        WaitingFor.append((EncapsulatedID, MessageTypes.GetAllClientCommands))
+    }
+    
+    var WaitingFor = [(UUID, MessageTypes)]()
+    
+    private var _ClientCommandList: [ClientCommand] = [ClientCommand]()
+    var ClientCommandList: [ClientCommand]
+    {
+        get
+        {
+            return _ClientCommandList
+        }
+    }
+    
+    var _ConnectedClient: MCPeerID? = nil
+    {
+        didSet
+        {
+            if _ConnectedClient == nil
+            {
+                _ClientCommandList.removeAll()
+            }
+            else
+            {
+                GetCommandsFromClient(_ConnectedClient!)
+            }
+        }
+    }
+    var ConnectedClient: MCPeerID?
+    {
+        get
+        {
+            return _ConnectedClient
+        }
+    }
+    
     func HandleHandShakeCommand(_ Raw: String, Peer: MCPeerID)
     {
         let Command = MessageHelper.DecodeHandShakeCommand(Raw)
         print("Handshake command: \(Command)")
         OperationQueue.main.addOperation
             {
-        let ReturnMe = State.TransitionTo(NewState: Command)
+                let ReturnMe = State.TransitionTo(NewState: Command)
                 print("State result=\(ReturnMe), State.CurrentState=\(State.CurrentState)")
                 var ReturnState = ""
                 switch ReturnMe
@@ -349,7 +392,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 }
                 if !ReturnState.isEmpty
                 {
-                self.MPMgr.SendPreformatted(Message: ReturnState, To: Peer)
+                    self.MPMgr.SendPreformatted(Message: ReturnState, To: Peer)
                 }
         }
     }
@@ -376,9 +419,25 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String)
+    func SendClientCommandList(Peer: MCPeerID, CommandID: UUID)
     {
-        let MessageType = MessageHelper.GetMessageType(RawData)
+        let AllCommands = MessageHelper.MakeAllClientCommands(Commands: LocalCommands)
+        let EncapsulatedReturn = MessageHelper.MakeEncapsulatedCommand(WithID: CommandID, Payload: AllCommands)
+        MPMgr.SendPreformatted(Message: EncapsulatedReturn, To: Peer)
+    }
+    
+    func ReceivedData(Manager: MultiPeerManager, Peer: MCPeerID, RawData: String,
+                      OverrideMessageType: MessageTypes? = nil, EncapsulatedID: UUID? = nil)
+    {
+        var MessageType: MessageTypes = .Unknown
+        if let OverrideMe = OverrideMessageType
+        {
+            MessageType = OverrideMe
+        }
+        else
+        {
+         MessageType = MessageHelper.GetMessageType(RawData)
+        }
         switch MessageType
         {
         case .HandShake:
@@ -407,9 +466,47 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
             
         case .TextMessage:
             HandleTextMessage(RawData)
-
+            
+        case .GetAllClientCommands:
+            SendClientCommandList(Peer: Peer, CommandID: EncapsulatedID!)
+            
         default:
+            print("Unhandled message type: \(MessageType)")
             break
+        }
+    }
+    
+    func ProcessAsyncResult(CommandID: UUID, Peer: MCPeerID, MessageType: MessageTypes, RawData: String)
+    {
+        WaitingFor.removeAll(where: {$0.0 == CommandID})
+        print("RawData=\(RawData)")
+    }
+    
+    func ReceivedAsyncData(Manager: MultiPeerManager, Peer: MCPeerID, CommandID: UUID, RawData: String)
+    {
+        print("Received async response from ID: \(CommandID).")
+        for (ID, MessageType) in WaitingFor
+        {
+            if ID == CommandID
+            {
+                //Handle the asynchronous response here - be sure to return after handling it and to not
+                //drop through the bottom of the loop.
+                print("Found matching response for \(MessageType) command.")
+                ProcessAsyncResult(CommandID: CommandID, Peer: Peer, MessageType: MessageType, RawData: RawData)
+                return
+            }
+        }
+        
+        //If we're here, we most likely received an encapsulated command.
+        if let MessageType = MessageHelper.MessageTypeFromString(RawData)
+        {
+            print("Bottom of ReceivedAsyncData: MessageType=\(MessageType), RawData=\(RawData)")
+            ReceivedData(Manager: Manager, Peer: Peer, RawData: RawData,
+                         OverrideMessageType: MessageType, EncapsulatedID: CommandID)
+        }
+        else
+        {
+            print("Unknown message type found: \(RawData)")
         }
     }
     
@@ -453,16 +550,16 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         OperationQueue.main.addOperation
             {
-        if let ItemIndex = self.KVPList.firstIndex(where: {$0.ID == ID})
-        {
-            self.KVPList[ItemIndex].Key = Name
-            self.KVPList[ItemIndex].Value = Value
-        }
-        else
-        {
-            self.KVPList.append(KVPItem(ID, WithKey: Name, AndValue: Value))
-        }
-        self.KVPTable.reloadData()
+                if let ItemIndex = self.KVPList.firstIndex(where: {$0.ID == ID})
+                {
+                    self.KVPList[ItemIndex].Key = Name
+                    self.KVPList[ItemIndex].Value = Value
+                }
+                else
+                {
+                    self.KVPList.append(KVPItem(ID, WithKey: Name, AndValue: Value))
+                }
+                self.KVPTable.reloadData()
         }
     }
     
