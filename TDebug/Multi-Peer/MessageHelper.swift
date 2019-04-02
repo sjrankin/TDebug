@@ -7,7 +7,11 @@
 //
 
 import Foundation
+#if FOR_MACOS
+import AppKit
+#else
 import UIKit
+#endif
 
 class MessageHelper
 {
@@ -25,6 +29,24 @@ class MessageHelper
             return nil
         }
         return (String(Parts[0]), String(Parts[1]))
+    }
+    
+    public static func DecodeEncapsulatedCommand(_ Raw: String) -> (UUID, String)?
+    {
+        let Delimiter = String(Raw.first!)
+        var Next = Raw
+        Next.removeFirst()
+        let Parts = Next.split(separator: String.Element(Delimiter))
+        if Parts.count != 3
+        {
+            return nil
+        }
+        let (_, IDS) = DecodeKVP(String(Parts[1]), Delimiter: "=")!
+        if let ID = UUID(uuidString: IDS)
+        {
+            return (ID, String(Parts[2]))
+        }
+        return nil
     }
     
     public static func DecodeHandShakeCommand(_ Raw: String) -> HandShakeCommands
@@ -160,7 +182,7 @@ class MessageHelper
     
     //Format of command: command,address{,data}
     //returns command, address, text, fg color, bg color
-    public static func DecodeIdiotLightMessage(_ Raw: String) ->(IdiotLightCommands, String, String?, UIColor?, UIColor?)
+    public static func DecodeIdiotLightMessage(_ Raw: String) ->(IdiotLightCommands, String, String?, OSColor?, OSColor?)
     {
         let Delimiter = String(Raw.first!)
         var Next = Raw
@@ -182,8 +204,8 @@ class MessageHelper
         var Address = ""
         var Text: String? = nil
         var Command: IdiotLightCommands = .Unknown
-        var BGColor: UIColor? = nil
-        var FGColor: UIColor? = nil
+        var BGColor: OSColor? = nil
+        var FGColor: OSColor? = nil
         for Part in PartsList
         {
             switch Part.0
@@ -208,11 +230,11 @@ class MessageHelper
                 
             case "BGColor":
                 Command = .SetBGColor
-                BGColor = UIColor(HexString: Part.1)!
+                BGColor = OSColor(HexString: Part.1)!
                 
             case "FGColor":
                 Command = .SetFGColor
-                FGColor = UIColor(HexString: Part.1)!
+                FGColor = OSColor(HexString: Part.1)!
                 
             default:
                 continue
@@ -225,7 +247,7 @@ class MessageHelper
     {
         if Raw.isEmpty
         {
-            return MessageTypes.Unknown
+            return .Unknown
         }
         let Delimiter = String(Raw.first!)
         var Next = Raw
@@ -424,18 +446,21 @@ class MessageHelper
     {
         let Now = MakeTimeStamp(FromDate: Date())
         let Delimiter = GetUnusedDelimiter(From: [Now, Message, DeviceName, Command])
-        let Final = Delimiter + Command + Delimiter + DeviceName + Delimiter + Now + Delimiter + Message
+        let Final = AssembleCommand(FromParts: [Command, DeviceName, Now, Message], WithDelimiter: Delimiter)
+        //let Final = Delimiter + Command + Delimiter + DeviceName + Delimiter + Now + Delimiter + Message
         return Final
     }
     
     public static func MakeMessage(WithType: MessageTypes, _ WithText: String, _ HostName: String) -> String
     {
-        return EncodeTextToSend(Message: WithText, DeviceName: HostName, Command: MessageTypeIndicators[WithType]!)
+        return EncodeTextToSend(Message: WithText, DeviceName: HostName,
+                                Command: MessageTypeIndicators[WithType]!)
     }
     
     public static func MakeMessage(_ WithText: String, _ HostName: String) -> String
     {
-        return EncodeTextToSend(Message: WithText, DeviceName: HostName, Command: MessageTypeIndicators[.TextMessage]!)
+        return EncodeTextToSend(Message: WithText, DeviceName: HostName,
+                                Command: MessageTypeIndicators[.TextMessage]!)
     }
     
     public static func MakeHeartbeatMessage(NextExpectedIn: Int, _ HostName: String) -> String
@@ -474,7 +499,7 @@ class MessageHelper
         return Final
     }
     
-    public static func MakeIdiotLightMessage(Address: String, FGColor: UIColor) -> String
+    public static func MakeIdiotLightMessage(Address: String, FGColor: OSColor) -> String
     {
         let Command = MessageTypeIndicators[.ControlIdiotLight]!
         let Addr = "Address=\(Address)"
@@ -484,7 +509,7 @@ class MessageHelper
         return Final
     }
     
-    public static func MakeIdiotLightMessage(Address: String, BGColor: UIColor) -> String
+    public static func MakeIdiotLightMessage(Address: String, BGColor: OSColor) -> String
     {
         let Command = MessageTypeIndicators[.ControlIdiotLight]!
         let Addr = "Address=\(Address)"
@@ -620,6 +645,42 @@ class MessageHelper
         return Final
     }
     
+    /// Make a command to return all client commands.
+    public static func MakeGetAllClientCommands() -> String
+    {
+        return MessageTypeIndicators[.GetAllClientCommands]!
+    }
+    
+    /// Make a command string returning all client commands.
+    ///
+    /// - Parameter Commands: The client command manager, populated with all supported client commands.
+    /// - Returns: String with all client commands in the passed client command manager.
+    public static func MakeAllClientCommands(Commands: ClientCommands) -> String
+    {
+        let CommandList = Commands.MakeCommandList()
+        let Cmd = MessageTypeIndicators[.AllClientCommandsReturned]!
+        let CmdCount = "Count=\(CommandList.count)"
+        let Delimiter = GetUnusedDelimiter(From: [[Cmd, CmdCount], CommandList])
+        let Final = AssembleCommandsEx(FromParts: [[Cmd, CmdCount], CommandList], WithDelimiter: Delimiter)
+        return Final
+    }
+    
+    /// Make an encapsulated command. Encapsulated commands are used to coordinate asynchronous commands with
+    /// their asynchronous results.
+    ///
+    /// - Parameters:
+    ///   - WithID: The asynchronous command ID - each time this is called, a different UIID should be used.
+    ///   - Payload: The command to encapsulate.
+    /// - Returns: Encpasulated command string.
+    public static func MakeEncapsulatedCommand(WithID: UUID, Payload: String) -> String
+    {
+        let Cmd = MessageTypeIndicators[.IDEncapsulatedCommand]!
+        let CmdID = "ID=\(WithID.uuidString)"
+        let Delimiter = GetUnusedDelimiter(From: [Cmd, CmdID, Payload])
+        let Final = AssembleCommand(FromParts: [Cmd, CmdID, Payload], WithDelimiter: Delimiter)
+        return Final
+    }
+    
     /// Assemble the list of string into a command that can be sent to another TDebug instance or other app that implements
     /// at least the MultiPeerManager.
     ///
@@ -660,6 +721,26 @@ class MessageHelper
         return AssembleCommand(FromParts: FinalList, WithDelimiter: WithDelimiter)
     }
     
+    /// Given a message type ID in string format, return the actual message type.
+    ///
+    /// - Parameter Raw: Message type ID in string format.
+    /// - Returns: MessageType enumeration on success, nil if not found.
+    public static func MessageTypeFromString(_ Raw: String) -> MessageTypes?
+    {
+        if let FindMe = UUID(uuidString: Raw)
+        {
+            for (MType, RawString) in MessageTypeIndicators
+            {
+                let MID = UUID(uuidString: RawString)
+                if MID == FindMe
+                {
+                    return MType
+                }
+            }
+        }
+        return nil
+    }
+    
     private static let MessageTypeIndicators: [MessageTypes: String] =
         [
             MessageTypes.TextMessage: "a8d8c35e-f638-47fe-8819-bd04d59c6989",
@@ -677,6 +758,9 @@ class MessageHelper
             MessageTypes.CommandByIndex: "37b02db4-f425-48a8-b6e7-7bbced7a0990",
             MessageTypes.SendCommandToClient: "9cfc1d01-f1f0-4d26-bb38-300ff3df0c92",
             MessageTypes.ClientCommandResult: "79726762-3eeb-450f-8c29-4701857a5073",
+            MessageTypes.GetAllClientCommands: "582e3f52-a9ad-4ef3-8842-b8334a547500",
+            MessageTypes.AllClientCommandsReturned: "6b3c2e18-879d-488e-b333-2d43eacb9c71",
+            MessageTypes.IDEncapsulatedCommand: "c0e8487c-840a-4799-9d9d-906adb96f0a3",
             MessageTypes.Unknown: "dfc5b2d5-521b-46a8-b459-a4947089312c",
     ]
     
@@ -734,6 +818,9 @@ enum MessageTypes: Int
     case CommandByIndex = 12
     case SendCommandToClient = 13
     case ClientCommandResult = 14
+    case GetAllClientCommands = 15
+    case AllClientCommandsReturned = 16
+    case IDEncapsulatedCommand = 17
     case Unknown = 10000
 }
 
