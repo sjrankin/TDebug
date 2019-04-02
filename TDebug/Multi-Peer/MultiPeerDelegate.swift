@@ -1,8 +1,8 @@
 //
 //  MultiPeerDelegate.swift
-//  TDebug
+//  TDDebug
 //
-//  Created by Stuart Rankin on 3/29/19.
+//  Created by Stuart Rankin on 4/1/19.
 //  Copyright © 2019 Stuart Rankin. All rights reserved.
 //
 
