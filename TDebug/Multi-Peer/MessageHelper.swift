@@ -1,8 +1,8 @@
 //
 //  MessageHelper.swift
-//  TDebug
+//  TDDebug
 //
-//  Created by Stuart Rankin on 3/29/19.
+//  Created by Stuart Rankin on 4/1/19.
 //  Copyright © 2019 Stuart Rankin. All rights reserved.
 //
 
@@ -412,6 +412,12 @@ class MessageHelper
         return "\u{2}"
     }
     
+    private static func GetUnusedDelimiter(From: [[String]]) -> String
+    {
+        let FinalList = From.flatMap{$0}
+        return GetUnusedDelimiter(From: FinalList)
+    }
+    
     private static let Delimiters = [",", ";", ".", "/", ":", "-", "_", "`", "~", "\"", "'", "$", "!", "\\", "¥", "°", "^", "·", "€", "‹", "›", "@"]
     
     private static func EncodeTextToSend(Message: String, DeviceName: String, Command: String) -> String
@@ -497,7 +503,7 @@ class MessageHelper
         let EchoMessage = "Message=\(Message)"
         let Delimiter = GetUnusedDelimiter(From: [Command, ReturnAddress, EchoCount, EchoDelay, EchoMessage])
         let Final = AssembleCommand(FromParts: [Command, ReturnAddress, EchoMessage, EchoDelay, EchoCount], WithDelimiter: Delimiter)
-    return Final
+        return Final
     }
     
     public static func MakeKVPMessage(ID: UUID, Key: String, Value: String) -> String
@@ -529,14 +535,129 @@ class MessageHelper
         return Final
     }
     
+    public static func MakeGetCommandCount() -> String
+    {
+        return MessageTypeIndicators[.RequestCommandCount]!
+    }
+    
+    /// Make a command string that requests a client command at the CommandIndexth position.
+    ///
+    /// - Parameter CommandIndex: Determines the client command to return.
+    /// - Returns: Command string for retrieving the CommandIndexth client command.
+    public static func MakeGetCommand(CommandIndex: Int) -> String
+    {
+        let Cmd = MessageTypeIndicators[.GetCommand]!
+        let Payload = "Index=\(CommandIndex)"
+        let Delimiter = GetUnusedDelimiter(From: [Cmd, Payload])
+        let Final = AssembleCommand(FromParts: [Cmd, Payload], WithDelimiter: Delimiter)
+        return Final
+    }
+    
+    /// Make a command string returning the Indexth client command. Sent in response to a `MakeGetCommand` command string.
+    ///
+    /// - Parameters:
+    ///   - Index: Index of the returned command - corresonds to the `CommandIndex` parameter in `MakeGetCommand`.
+    ///   - Command: ID of the command.
+    ///   - CommandName: Name of the command.
+    ///   - Description: Description of the command.
+    ///   - Parameters: List of parameter names.
+    /// - Returns: String representing the client command returnable by multi-peer messaging.
+    public static func MakeReturnCommandByIndex(Index: Int, Command: UUID, CommandName: String,
+                                                Description: String, Parameters: [String]) -> String
+    {
+        let Cmd = MessageTypeIndicators[.CommandByIndex]!
+        let SIndex = "Index=\(Index)"
+        let CmdVal = "Command=\(Command.uuidString)"
+        let CName = "Name=\(CommandName)"
+        let CDesc = "Description=\(Description)"
+        let PCount = "ParameterCount=\(Parameters.count)"
+        var PList = [String]()
+        for Param in Parameters
+        {
+            PList.append("Param=\(Param)")
+        }
+        let Delimiter = GetUnusedDelimiter(From: [[Cmd, SIndex, CmdVal, CName, CDesc, PCount], PList])
+        let Final = AssembleCommandsEx(FromParts: [[Cmd, SIndex, CmdVal, CName, CDesc, PCount], PList], WithDelimiter: Delimiter)
+        return Final
+    }
+    
+    /// Make a string command to execute a client command in the client app on the remote system.
+    ///
+    /// - Parameters:
+    ///   - CommandID: Client command ID.
+    ///   - Parameters: List of tuples in the format (Parameter Name, Parameter Value).
+    /// - Returns: String command to execute a client command.
+    public static func MakeCommandForClient(CommandID: UUID, Parameters: [(String, String)]) -> String
+    {
+        let Cmd = MessageTypeIndicators[.SendCommandToClient]!
+        let CmdID = "Command=\(CommandID)"
+        let Count = "ParameterCount=\(Parameters.count)"
+        var PList = [String]()
+        for Param in Parameters
+        {
+            PList.append("\(Param.0)=\(Param.1)")
+        }
+        let Delimiter = GetUnusedDelimiter(From: [[Cmd, CmdID, Count], PList])
+        let Final = AssembleCommandsEx(FromParts: [[Cmd, CmdID, Count], PList], WithDelimiter: Delimiter)
+        return Final
+    }
+    
+    /// Make a string command to return client command execution results to the caller.
+    ///
+    /// - Parameters:
+    ///   - Result: Result of the client command execution (eg, true, false indicating success or failure of executing
+    ///             the command).
+    ///   - ReturnValue: The return value (if any) from the command execution. Not considered valid if `Result` in some
+    ///                  way indicates a failure to execute the command.
+    /// - Returns: String to send to the caller with the results of the client command execution.
+    public static func MakeClientCommandResult(Result: String, ReturnValue: String) -> String
+    {
+        let Cmd = MessageTypeIndicators[.ClientCommandResult]!
+        let SResult = "Result=\(Result)"
+        let SValue = "Value=\(ReturnValue)"
+        let Delimiter = GetUnusedDelimiter(From: [Cmd, SResult, SValue])
+        let Final = AssembleCommand(FromParts: [Cmd, SResult, SValue], WithDelimiter: Delimiter)
+        return Final
+    }
+    
+    /// Assemble the list of string into a command that can be sent to another TDebug instance or other app that implements
+    /// at least the MultiPeerManager.
+    ///
+    /// - Note: The format of the returned string is Delimiter Part {Delimiter Part}. This is so the parsing code can easily
+    ///         determine what the delimiter is to seperate the parts of the raw string into coherent parts.
+    ///
+    /// - Parameters:
+    ///   - FromParts: List of parts of the command to assemble. Order is presevered.
+    ///   - WithDelimiter: The delimiter to use to separate the parts from each other.
+    /// - Returns: Command string that can be sent to another TDebug instance.
     static func AssembleCommand(FromParts: [String], WithDelimiter: String) -> String
     {
         var Final = ""
         for Part in FromParts
         {
+            if Part.isEmpty
+            {
+                continue
+            }
             Final = Final + WithDelimiter + Part
         }
         return Final
+    }
+    
+    /// Assemble the list of string into a command that can be sent to another TDebug instance or other app that implements
+    /// at least the MultiPeerManager.
+    ///
+    /// - Note: The format of the returned string is Delimiter Part {Delimiter Part}. This is so the parsing code can easily
+    ///         determine what the delimiter is to seperate the parts of the raw string into coherent parts.
+    ///
+    /// - Parameters:
+    ///   - FromParts: List of list of parts of the command to assemble. Order is presevered.
+    ///   - WithDelimiter: The delimiter to use to separate the parts from each other.
+    /// - Returns: Command string that can be sent to another TDebug instance.
+    static func AssembleCommandsEx(FromParts: [[String]], WithDelimiter: String) -> String
+    {
+        let FinalList = FromParts.flatMap{$0}
+        return AssembleCommand(FromParts: FinalList, WithDelimiter: WithDelimiter)
     }
     
     private static let MessageTypeIndicators: [MessageTypes: String] =
@@ -551,25 +672,30 @@ class MessageHelper
             MessageTypes.EchoReturn: "970bac64-f399-499d-8db6-c65e508ae40d",
             MessageTypes.SpecialCommand: "e83a5588-b285-49ee-b2fe-95f803f073b7",
             MessageTypes.HandShake: "52c4be7a-b84f-4812-880e-98b4c67543fb",
+            MessageTypes.RequestCommandCount: "7eea42d3-7cda-4c4d-bb06-39b52f2cbac9",
+            MessageTypes.GetCommand: "ec0d895a-2648-4db8-8d67-20be849edb32",
+            MessageTypes.CommandByIndex: "37b02db4-f425-48a8-b6e7-7bbced7a0990",
+            MessageTypes.SendCommandToClient: "9cfc1d01-f1f0-4d26-bb38-300ff3df0c92",
+            MessageTypes.ClientCommandResult: "79726762-3eeb-450f-8c29-4701857a5073",
             MessageTypes.Unknown: "dfc5b2d5-521b-46a8-b459-a4947089312c",
     ]
     
     private static let SpecialCommmandIndicators: [SpecialCommands: String] =
-    [
-        .ClearKVPList: "a1a4974c-ed8f-41bc-bdbf-49570f67cc03",
-        .ClearLogList: "283c06c3-dca6-4044-a8ba-b034efd51594",
-        .ClearIdiotLights: "1600bf5d-ffa7-474b-ab55-c8298f056969",
-        .Unknown: "bbfb4205-d9f6-49cf-bd96-630641d4fb16",
+        [
+            .ClearKVPList: "a1a4974c-ed8f-41bc-bdbf-49570f67cc03",
+            .ClearLogList: "283c06c3-dca6-4044-a8ba-b034efd51594",
+            .ClearIdiotLights: "1600bf5d-ffa7-474b-ab55-c8298f056969",
+            .Unknown: "bbfb4205-d9f6-49cf-bd96-630641d4fb16",
     ]
     
     private static let HandShakeIndicators: [HandShakeCommands: String] =
-    [
-        .RequestConnection: "6dc88b50-15c0-41e0-aa6f-c1c33d93303b",
-        .ConnectionGranted: "fceee865-ccdc-4c6b-8944-3a959a64d894",
-        .ConnectionRefused: "b32f179c-c1b4-40c3-8bb0-ad84a985bad4",
-        .ConnectionClose: "70b6f26c-92fc-423f-9ea4-418d51cc0528",
-        .Disconnected: "78dfa276-48f3-47bc-88bc-4f46bd9f74ce",
-        .Unknown: "1f9e85e3-446b-4c93-b93d-ea8d6955f4bb",
+        [
+            .RequestConnection: "6dc88b50-15c0-41e0-aa6f-c1c33d93303b",
+            .ConnectionGranted: "fceee865-ccdc-4c6b-8944-3a959a64d894",
+            .ConnectionRefused: "b32f179c-c1b4-40c3-8bb0-ad84a985bad4",
+            .ConnectionClose: "70b6f26c-92fc-423f-9ea4-418d51cc0528",
+            .Disconnected: "78dfa276-48f3-47bc-88bc-4f46bd9f74ce",
+            .Unknown: "1f9e85e3-446b-4c93-b93d-ea8d6955f4bb",
     ]
 }
 
@@ -603,6 +729,11 @@ enum MessageTypes: Int
     case EchoReturn = 7
     case SpecialCommand = 8
     case HandShake = 9
+    case RequestCommandCount = 10
+    case GetCommand = 11
+    case CommandByIndex = 12
+    case SendCommandToClient = 13
+    case ClientCommandResult = 14
     case Unknown = 10000
 }
 
