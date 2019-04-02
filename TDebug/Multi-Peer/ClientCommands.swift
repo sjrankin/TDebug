@@ -8,6 +8,16 @@
 
 import Foundation
 
+//
+//  ClientCommands.swift
+//  TDDebug
+//
+//  Created by Stuart Rankin on 4/2/19.
+//  Copyright © 2019 Stuart Rankin. All rights reserved.
+//
+
+import Foundation
+
 /// Manages all client-side commands.
 class ClientCommands
 {
@@ -94,7 +104,7 @@ class ClientCommands
     ///
     /// - Parameter Command: The command ID to verify against the current set of all commands.
     /// - Returns: True if the command ID is present, false if not.
-    func IsKnownCommand(_ Command: UUID) -> Bool
+    public func IsKnownCommand(_ Command: UUID) -> Bool
     {
         return GetCommand(Command) != nil
     }
@@ -103,7 +113,7 @@ class ClientCommands
     ///
     /// - Parameter CommandID: The command ID whose client command will be returned.
     /// - Returns: The client command on success, nil if not found.
-    func GetCommand(_ CommandID: UUID) -> ClientCommand?
+    public func GetCommand(_ CommandID: UUID) -> ClientCommand?
     {
         let AllCommands = GetAllCommands()
         for (CmdID, Cmd) in AllCommands
@@ -119,7 +129,7 @@ class ClientCommands
     /// Returns a list of string ready to send over multi-peer communications based on all client commands.
     ///
     /// - Returns: List of client command strings.
-    func MakeCommandList() -> [String]
+    public func MakeCommandList() -> [String]
     {
         let AllCommands = GetAllCommands()
         var Results = [String]()
