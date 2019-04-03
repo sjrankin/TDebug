@@ -13,9 +13,16 @@ import AppKit
 import UIKit
 #endif
 
+/// Class that helps with encoding and decoding messages sent to and from TD{D}ebug instances.
 class MessageHelper
 {
-    private static func DecodeKVP(_ Raw: String, Delimiter: String) -> (String, String)?
+    /// Decode a key-value pair with the specified delimiter. The format is assumed to be: key=value.
+    ///
+    /// - Parameters:
+    ///   - Raw: The string with the value to decode.
+    ///   - Delimiter: The delimiter between the key and value.
+    /// - Returns: Tuple with (Key, Value) (both as Strings) on success, nil on error.
+    private static func DecodeKVP(_ Raw: String, Delimiter: String = "=") -> (String, String)?
     {
         if Delimiter.isEmpty
         {
@@ -31,6 +38,35 @@ class MessageHelper
         return (String(Parts[0]), String(Parts[1]))
     }
     
+    public static func DecodeReturnedCommandList(_ Raw: String) -> [ClientCommand]?
+    {
+        let Result = [ClientCommand]()
+        
+        //First, remove the returned command
+        let Delimiter = String(Raw.first!)
+        var Next = Raw
+        Next.removeFirst()
+        let Parts = Next.split(separator: String.Element(Delimiter))
+        let (CmdCountKey, CmdCountValue) = DecodeKVP(String(Parts[1]))!
+        if CmdCountKey != "Count"
+        {
+            print("Mal-formed returned command list encountered.")
+            return nil
+        }
+        let CmdCount = Int(CmdCountValue)!
+        for Part in Parts
+        {
+            print("\(String(Part))")
+        }
+        print("Part count=\(Parts.count)")
+        
+        return Result
+    }
+    
+    /// Decode an encapsulated ID command.
+    ///
+    /// - Parameter Raw: The raw value to decode.
+    /// - Returns: Tupele in the following order: (ID of the encapsulated command, Raw, encoded command). Nil on error.
     public static func DecodeEncapsulatedCommand(_ Raw: String) -> (UUID, String)?
     {
         let Delimiter = String(Raw.first!)
@@ -446,21 +482,18 @@ class MessageHelper
     {
         let Now = MakeTimeStamp(FromDate: Date())
         let Delimiter = GetUnusedDelimiter(From: [Now, Message, DeviceName, Command])
-        let Final = AssembleCommand(FromParts: [Command, DeviceName, Now, Message], WithDelimiter: Delimiter)
-        //let Final = Delimiter + Command + Delimiter + DeviceName + Delimiter + Now + Delimiter + Message
+        let Final = Delimiter + Command + Delimiter + DeviceName + Delimiter + Now + Delimiter + Message
         return Final
     }
     
     public static func MakeMessage(WithType: MessageTypes, _ WithText: String, _ HostName: String) -> String
     {
-        return EncodeTextToSend(Message: WithText, DeviceName: HostName,
-                                Command: MessageTypeIndicators[WithType]!)
+        return EncodeTextToSend(Message: WithText, DeviceName: HostName, Command: MessageTypeIndicators[WithType]!)
     }
     
     public static func MakeMessage(_ WithText: String, _ HostName: String) -> String
     {
-        return EncodeTextToSend(Message: WithText, DeviceName: HostName,
-                                Command: MessageTypeIndicators[.TextMessage]!)
+        return EncodeTextToSend(Message: WithText, DeviceName: HostName, Command: MessageTypeIndicators[.TextMessage]!)
     }
     
     public static func MakeHeartbeatMessage(NextExpectedIn: Int, _ HostName: String) -> String
@@ -590,7 +623,7 @@ class MessageHelper
     public static func MakeReturnCommandByIndex(Index: Int, Command: UUID, CommandName: String,
                                                 Description: String, Parameters: [String]) -> String
     {
-        let Cmd = MessageTypeIndicators[.CommandByIndex]!
+        let Cmd = "ID=\(MessageTypeIndicators[.CommandByIndex]!)"
         let SIndex = "Index=\(Index)"
         let CmdVal = "Command=\(Command.uuidString)"
         let CName = "Name=\(CommandName)"
@@ -660,8 +693,10 @@ class MessageHelper
         let CommandList = Commands.MakeCommandList()
         let Cmd = MessageTypeIndicators[.AllClientCommandsReturned]!
         let CmdCount = "Count=\(CommandList.count)"
-        let Delimiter = GetUnusedDelimiter(From: [[Cmd, CmdCount], CommandList])
-        let Final = AssembleCommandsEx(FromParts: [[Cmd, CmdCount], CommandList], WithDelimiter: Delimiter)
+        let CDel = GetUnusedDelimiter(From: CommandList)
+        let FinalCommandList = AssembleCommand(FromParts: CommandList, WithDelimiter: CDel)
+        let Delimiter = GetUnusedDelimiter(From: [Cmd, CmdCount, FinalCommandList])
+        let Final = AssembleCommand(FromParts: [Cmd, CmdCount, FinalCommandList], WithDelimiter: Delimiter)
         return Final
     }
     
@@ -779,6 +814,7 @@ class MessageHelper
             .ConnectionRefused: "b32f179c-c1b4-40c3-8bb0-ad84a985bad4",
             .ConnectionClose: "70b6f26c-92fc-423f-9ea4-418d51cc0528",
             .Disconnected: "78dfa276-48f3-47bc-88bc-4f46bd9f74ce",
+            .DropAsClient: "dc430ff8-c1a3-4d01-8a0a-67997b59da31",
             .Unknown: "1f9e85e3-446b-4c93-b93d-ea8d6955f4bb",
     ]
 }
@@ -798,6 +834,7 @@ enum HandShakeCommands: Int
     case ConnectionRefused = 2
     case ConnectionClose = 3
     case Disconnected = 4
+    case DropAsClient = 5
     case Unknown = 10000
 }
 
