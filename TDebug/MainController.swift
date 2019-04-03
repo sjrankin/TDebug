@@ -387,6 +387,10 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 case .RequestConnection:
                     break
                     
+                case .DropAsClient:
+                    State.TransitionTo(NewState: .Disconnected)
+                    break
+                    
                 case .Unknown:
                     break
                 }
