@@ -361,6 +361,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
     {
         let Command = MessageHelper.DecodeHandShakeCommand(Raw)
         print("Handshake command: \(Command)")
+        var PostConnect = ""
         OperationQueue.main.addOperation
             {
                 let ReturnMe = State.TransitionTo(NewState: Command)
@@ -375,6 +376,7 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     let Item = LogItem(Text: "\(Peer.displayName) is debugee.")
                     self.AddLogMessage(Item: Item)
                     ReturnState = MessageHelper.MakeHandShake(ReturnMe)
+                    PostConnect = MessageHelper.MakeSendVersionInfo()
                     
                 case .ConnectionRefused:
                     let Item = LogItem(Text: "Connection refused by \(Peer.displayName)")
@@ -397,6 +399,10 @@ class MainController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 if !ReturnState.isEmpty
                 {
                     self.MPMgr.SendPreformatted(Message: ReturnState, To: Peer)
+                    if !PostConnect.isEmpty
+                    {
+                        self.MPMgr.SendPreformatted(Message: PostConnect, To: Peer)
+                    }
                 }
         }
     }
