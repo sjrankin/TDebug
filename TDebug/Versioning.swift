@@ -25,6 +25,12 @@ public class Versioning
     /// Name of the application.
     public static let ApplicationName = "TDebug"
     
+    /// ID of the application.
+    public static let ProgramID = "34197aa6-55af-4c08-ab87-848b63a9b71c"
+    
+    /// The intended OS for the program.
+    public static let IntendedOS = "iOS"
+    
     /// Returns a standard-formatted version string in the form of "Major.Minor" with optional
     /// version suffix.
     ///
@@ -49,19 +55,19 @@ public class Versioning
     }
     
     /// Build number.
-    public static let Build: Int = 615
+    public static let Build: Int = 616
     
     /// Build increment.
     private static let BuildIncrement = 1
     
     /// Build ID.
-    public static let BuildID: String = "F88B05C3-2B51-43D8-9DA1-FBB015820AB3"
+    public static let BuildID: String = "EF04F423-8D5F-481C-84D0-C9D2DE2C93EF"
     
     /// Build date.
-    public static let BuildDate: String = "3 April 2019"
+    public static let BuildDate: String = "4 April 2019"
     
     /// Build Time.
-    public static let BuildTime: String = "17:22"
+    public static let BuildTime: String = "11:40"
     
     /// Return a standard build string.
     ///
@@ -102,6 +108,12 @@ public class Versioning
         return CopyrightTextString
     }
     
+    /// Return the program ID as a UUID.
+    public static func ProgramIDAsUUID() -> UUID
+    {
+        return UUID(uuidString: ProgramID)!
+    }
+    
     /// Returns a block of text with most of the versioning information.
     ///
     /// - Returns: Most versioning information, on different lines.
@@ -111,7 +123,8 @@ public class Versioning
         Block = Block + MakeVersionString(IncludeVersionSuffix: true, IncludeVersionPrefix: true) + "\n"
         Block = Block + MakeBuildString() + "\n"
         Block = Block + "Build ID " + BuildID + "\n"
-        Block = Block + CopyrightText()
+        Block = Block + CopyrightText() + "\n"
+        Block = Block + "Program ID " + ProgramID
         return Block
     }
     
