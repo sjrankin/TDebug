@@ -17,6 +17,7 @@
 		171A2DFC224E0AC600B3D556 /* MainProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2DFB224E0AC600B3D556 /* MainProtocol.swift */; };
 		171A2DFF224E39BC00B3D556 /* ClientTestUI.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 171A2DFE224E39BC00B3D556 /* ClientTestUI.storyboard */; };
 		171A2E01224E40A700B3D556 /* ClientTestUICode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171A2E00224E40A700B3D556 /* ClientTestUICode.swift */; };
+		171EB5DF2255C1790075C134 /* OSColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 171EB5DE2255C1790075C134 /* OSColor.swift */; };
 		1734ABE422487F80007059F3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABE322487F80007059F3 /* AppDelegate.swift */; };
 		1734ABE922487F80007059F3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1734ABE722487F80007059F3 /* Main.storyboard */; };
 		1734ABEB22487F81007059F3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1734ABEA22487F81007059F3 /* Assets.xcassets */; };
@@ -26,7 +27,6 @@
 		1734ABFA2248889C007059F3 /* IDTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABF92248889C007059F3 /* IDTableCell.swift */; };
 		1734ABFE22488DCB007059F3 /* LogTableCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1734ABFD22488DCB007059F3 /* LogTableCell.swift */; };
 		1734AC022248CDB6007059F3 /* SendToRemote.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1734AC012248CDB6007059F3 /* SendToRemote.storyboard */; };
-		1772A2FE22537D68006D0A16 /* OSColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1772A2FD22537D68006D0A16 /* OSColor.swift */; };
 		177FAB28224A468A00379A4C /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB27224A468A00379A4C /* CommandParser.swift */; };
 		177FAB2B224A46CB00379A4C /* CommandObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB2A224A46CB00379A4C /* CommandObject.swift */; };
 		177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177FAB2C224A46EA00379A4C /* CommandProtocol.swift */; };
@@ -55,6 +55,7 @@
 		171A2DFB224E0AC600B3D556 /* MainProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainProtocol.swift; sourceTree = "<group>"; };
 		171A2DFE224E39BC00B3D556 /* ClientTestUI.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ClientTestUI.storyboard; sourceTree = "<group>"; };
 		171A2E00224E40A700B3D556 /* ClientTestUICode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientTestUICode.swift; sourceTree = "<group>"; };
+		171EB5DE2255C1790075C134 /* OSColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OSColor.swift; sourceTree = "<group>"; };
 		1734ABE022487F80007059F3 /* TDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1734ABE322487F80007059F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1734ABE822487F80007059F3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -66,7 +67,6 @@
 		1734ABF92248889C007059F3 /* IDTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDTableCell.swift; sourceTree = "<group>"; };
 		1734ABFD22488DCB007059F3 /* LogTableCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogTableCell.swift; sourceTree = "<group>"; };
 		1734AC012248CDB6007059F3 /* SendToRemote.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = SendToRemote.storyboard; sourceTree = "<group>"; };
-		1772A2FD22537D68006D0A16 /* OSColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSColor.swift; sourceTree = "<group>"; };
 		177FAB27224A468A00379A4C /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
 		177FAB2A224A46CB00379A4C /* CommandObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandObject.swift; sourceTree = "<group>"; };
 		177FAB2C224A46EA00379A4C /* CommandProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandProtocol.swift; sourceTree = "<group>"; };
@@ -177,7 +177,7 @@
 		1772A2FC22537D53006D0A16 /* OSColor */ = {
 			isa = PBXGroup;
 			children = (
-				1772A2FD22537D68006D0A16 /* OSColor.swift */,
+				171EB5DE2255C1790075C134 /* OSColor.swift */,
 			);
 			path = OSColor;
 			sourceTree = "<group>";
@@ -326,7 +326,7 @@
 				170DD2642251C8FF0017931C /* StateProtocol.swift in Sources */,
 				1734ABF82248862A007059F3 /* LogItem.swift in Sources */,
 				171A2DF5224DF3E100B3D556 /* MessageHelper.swift in Sources */,
-				1772A2FE22537D68006D0A16 /* OSColor.swift in Sources */,
+				171EB5DF2255C1790075C134 /* OSColor.swift in Sources */,
 				171A2DF1224DDFED00B3D556 /* MultiPeerDelegate.swift in Sources */,
 				177FAB3A224A598C00379A4C /* Command_SetIdiotLight.swift in Sources */,
 				177FAB2D224A46EA00379A4C /* CommandProtocol.swift in Sources */,

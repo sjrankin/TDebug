@@ -1,6 +1,6 @@
 //
 //  OSColor.swift
-//  TDebug
+//  TDDebug
 //
 //  Created by Stuart Rankin on 4/2/19.
 //  Copyright © 2019 Stuart Rankin. All rights reserved.
@@ -17,7 +17,7 @@ import UIKit
 /// Ultra-thin wrapper around NSColor.
 class OSColor: NSColor
 {
-    
+
 }
 #else
 /// Ultra-thin wrapper around UIColor.
